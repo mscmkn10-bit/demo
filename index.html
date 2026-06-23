@@ -1,226 +1,717 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>रोज़ का हिसाब - एडवांस्ड कैलकुलेटर</title>
+    <title>Financial Records Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; margin: 0;}
-        .container { max-width: 900px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin: 20px auto; }
-        h2 { text-align: center; color: #1e3a8a; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; color: #4b5563; }
-        input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
-        
-        .btn-container { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 25px; flex-wrap: wrap; }
-        button { flex: 1; padding: 12px; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; min-width: 150px; }
-        .btn-save { background: #2563eb; } .btn-save:hover { background: #1d4ed8; }
-        .btn-excel { background: #10b981; } .btn-excel:hover { background: #059669; }
-        .btn-pdf { background: #d97706; } .btn-pdf:hover { background: #b45309; }
-        .btn-clear { background: #ef4444; } .btn-clear:hover { background: #dc2626; }
-        
-        .table-wrapper { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 10px; border: 1px solid #e5e7eb; text-align: center; color: #000; }
-        th { background-color: #f3f4f6; color: #1f2937; }
-        .rem-amt { font-weight: bold; color: #b91c1c; }
+        :root {
+            --sidebar-width: 260px;
+            --bg-dark-sidebar: #1e1e2d;
+            --bg-dark-sidebar-hover: #1b1b28;
+            --accent-color: #009ef7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f8fa;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Layout */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--bg-dark-sidebar);
+            color: #a2a3b7;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        #sidebar .nav-link {
+            color: #a2a3b7;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            color: #fff;
+            background-color: var(--bg-dark-sidebar-hover);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        #main-content {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        /* Modern Dashboard Cards */
+        .stat-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Sticky Table Configuration */
+        .table-responsive-wrapper {
+            max-height: 600px;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f1f3f5;
+            z-index: 10;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        .table tbody tr:hover {
+            background-color: rgba(0, 158, 247, 0.04) !important;
+        }
+
+        /* Spinner Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #loading-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive UI Adjustments */
+        @media (max-width: 991.98px) {
+            #sidebar {
+                left: -var(--sidebar-width);
+            }
+            #sidebar.active {
+                left: 0;
+            }
+            #main-content {
+                margin-left: 0;
+            }
+            #main-content.active {
+                margin-left: var(--sidebar-width);
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>रोज़ का हिसाब कैलकुलेटर</h2>
-    
-    <div class="form-group">
-        <label>Applicant Name (आवेदक का नाम)</label>
-        <input type="text" id="appName" placeholder="नाम दर्ज करें">
-    </div>
-    
-    <div class="form-group">
-        <label>Type of Document (दस्तावेज़ का प्रकार)</label>
-        <input type="text" id="docType" placeholder="जैसे: सेल डीड, गिफ्ट डीड, एमोडिटी, एमोडी, रिलीज डीड...">
+    <div id="loading-overlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+            <div class="mt-2 fw-semibold">Processing Data Pipeline...</div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Total Amount (कुल राशि - ₹)</label>
-        <input type="number" id="totalAmt" placeholder="0.00">
-    </div>
-    
-    <div class="form-group">
-        <label>Challan Amount (चालान राशि - ₹)</label>
-        <input type="number" id="challanAmt" placeholder="0.00">
-    </div>
-
-    <div class="btn-container">
-        <button class="btn-save" onclick="calculateAndSave()" id="saveBtn">कैलकुलेट और सेव करें</button>
-        <button class="btn-excel" onclick="downloadExcel()">एक्सेल डाउनलोड</button>
-        <button class="btn-pdf" onclick="downloadPDF()">पीडीएफ (PDF) डाउनलोड</button>
-        <button class="btn-clear" onclick="clearData()">डेटा साफ करें</button>
+    <div id="sidebar">
+        <div class="p-4 text-white border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <h4 class="m-0 fw-bold"><i class="fa-solid fa-shield-halved text-info me-2"></i>FinDash</h4>
+        </div>
+        <div class="py-4">
+            <a href="#" class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Overview Dashboard</a>
+            <a href="#form-section" class="nav-link"><i class="fa-solid fa-square-plus"></i> Transaction Form</a>
+            <a href="#table-section" class="nav-link"><i class="fa-solid fa-table-list"></i> Database Records</a>
+        </div>
     </div>
 
-    <div class="table-wrapper">
-        <h3 style="color: #374151; text-align: center; margin-top: 0;">सेव किया गया हिसाब</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>दिनांक</th>
-                    <th>नाम</th>
-                    <th>दस्तावेज़</th>
-                    <th>कुल राशि</th>
-                    <th>चालान</th>
-                    <th>फिक्स (Fix)</th>
-                    <th>बची राशि</th>
-                </tr>
-            </thead>
-            <tbody id="entryTable"></tbody>
-        </table>
+    <div id="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <button id="sidebarToggle" class="btn btn-dark d-lg-none me-2"><i class="fa-solid fa-bars"></i></button>
+                <h2 class="fw-bold m-0 text-dark">Financial Management Hub</h2>
+                <small class="text-muted">Enterprise Grade Cloud Synchronized Dashboard</small>
+            </div>
+            <div>
+                <button class="btn btn-primary" id="btnSync"><i class="fa-solid fa-rotate me-2"></i>Fetch From Cloud</button>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card bg-white p-3 border-start border-primary border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase small">Total Entries</h6>
+                            <h3 class="fw-bold m-0" id="card-total-entries">0</h3>
+                        </div>
+                        <div class="bg-light-primary p-3 rounded-circle text-primary"><i class="fa-solid fa-folder-open fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card bg-white p-3 border-start border-success border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase small">Total Gross Amount</h6>
+                            <h3 class="fw-bold m-0" id="card-total-amount">₹0.00</h3>
+                        </div>
+                        <div class="bg-light-success p-3 rounded-circle text-success"><i class="fa-solid fa-wallet fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card bg-white p-3 border-start border-info border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase small">Total Net Received</h6>
+                            <h3 class="fw-bold m-0" id="card-total-received">₹0.00</h3>
+                        </div>
+                        <div class="bg-light-info p-3 rounded-circle text-info"><i class="fa-solid fa-hand-holding-dollar fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card bg-white p-3 border-start border-danger border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase small">Total Pending Pipeline</h6>
+                            <h3 class="fw-bold m-0" id="card-total-pending">₹0.00</h3>
+                        </div>
+                        <div class="bg-light-danger p-3 rounded-circle text-danger"><i class="fa-solid fa-hourglass-half fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-xl-4" id="form-section">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="fw-bold m-0" id="form-title"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Create New Entry</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="entryForm" novalidate>
+                            <input type="hidden" id="editIndex" value="">
+                            <input type="hidden" id="recordTimestamp" value="">
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Execution Date</label>
+                                <input type="date" class="form-control" id="formDate" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Applicant Full Name</label>
+                                <input type="text" class="form-control" id="formApplicantName" placeholder="Enter Full Name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Banking Institution</label>
+                                <input type="text" class="form-control" id="formBankName" placeholder="Enter Bank Node" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Total Base</label>
+                                    <input type="number" step="0.01" class="form-control formula-input" id="formTotalAmount" placeholder="0.00" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Challan Out</label>
+                                    <input type="number" step="0.01" class="form-control formula-input" id="formChallanAmount" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Per Challan Fee</label>
+                                    <input type="number" step="0.01" class="form-control formula-input" id="formPerChallanAmount" placeholder="0.00" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Net Calculated</label>
+                                    <input type="number" class="form-control bg-light" id="formReceivedAmount" readonly>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Workflow Status</label>
+                                <select class="form-select formula-input" id="formStatus" required>
+                                    <option value="Pending">Pending Evaluation</option>
+                                    <option value="Received">Fully Received</option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success p-2 fw-semibold" id="btnSubmitForm">Commit Entry</button>
+                                <button type="button" class="btn btn-secondary d-none" id="btnCancelEdit">Cancel Correction</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-8" id="table-section">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 class="fw-bold m-0"><i class="fa-solid fa-database me-2 text-primary"></i>Live System Audit</h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="exportData('print')"><i class="fa-solid fa-print"></i></button>
+                            <button class="btn btn-sm btn-outline-success" onclick="exportData('excel')"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="exportData('pdf')"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body bg-light border-bottom">
+                        <div class="row g-2">
+                            <div class="col-md-3 col-sm-6">
+                                <input type="text" id="filterApplicant" class="form-control form-control-sm" placeholder="Find Applicant...">
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <input type="text" id="filterBank" class="form-control form-control-sm" placeholder="Find Institution Bank...">
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <select id="filterStatus" class="form-select form-select-sm">
+                                    <option value="">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Received">Received</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6">
+                                <input type="date" id="filterStartDate" class="form-control form-control-sm" title="Start Range">
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6">
+                                <input type="date" id="filterEndDate" class="form-control form-control-sm" title="End Range">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive-wrapper">
+                            <table class="table table-hover align-middle mb-0" id="mainSummaryTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center px-3 text-uppercase font-monospace text-secondary small">S.N.</th>
+                                        <th class="text-uppercase text-secondary small">Date</th>
+                                        <th class="text-uppercase text-secondary small">Applicant</th>
+                                        <th class="text-uppercase text-secondary small">Bank</th>
+                                        <th class="text-uppercase text-secondary small text-end">Total Amount</th>
+                                        <th class="text-uppercase text-secondary small text-end">Challan Amount</th>
+                                        <th class="text-uppercase text-secondary small text-end">Per Challan</th>
+                                        <th class="text-uppercase text-secondary small text-end">Received Amount</th>
+                                        <th class="text-uppercase text-secondary small text-center">Status</th>
+                                        <th class="text-uppercase text-secondary small text-end">Pending Amount</th>
+                                        <th class="text-uppercase text-secondary small text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataGridBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    const GOOGLE_SHEET_URL = "यहाँ_अपना_GOOGLE_SCRIPT_URL_डालें"; 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
+        <div id="liveSystemToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 
-    window.onload = function() { displayData(); };
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
-    function calculateAndSave() {
-        let name = document.getElementById("appName").value.trim();
-        let docType = document.getElementById("docType").value.trim();
-        let total = parseFloat(document.getElementById("totalAmt").value);
-        let challan = parseFloat(document.getElementById("challanAmt").value);
+    <script>
+        // ==========================================
+        // PASTE YOUR GOOGLE WEB APP MACRO URL HERE:
+        // ==========================================
+        const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbwXiulnKoH28q9vYeKSGYzvJDLhIUm-DxTQz8ih6itNBSoUJYqgFKDhjlrqMfoNhdUK/exec";
+        
+        let localCacheMemory = [];
+        let executionLockState = false;
 
-        if(!name || !docType || isNaN(total) || isNaN(challan)) {
-            alert("कृपया सभी जानकारी सही से भरें!");
-            return;
+        const toastElement = document.getElementById('liveSystemToast');
+        const loaderOverlay = document.getElementById('loading-overlay');
+        const bsToast = new bootstrap.Toast(toastElement);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initializeLayoutMechanics();
+            loadCachedDatastore();
+            syncCloudDatastore();
+            registerDynamicFormulaObservers();
+        });
+
+        function initializeLayoutMechanics() {
+            document.getElementById('sidebarToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.getElementById('main-content').classList.toggle('active');
+            });
+            
+            document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
+
+            ['filterApplicant', 'filterBank', 'filterStatus', 'filterStartDate', 'filterEndDate'].forEach(id => {
+                document.getElementById(id).addEventListener('input', renderDataMatrixGrid);
+            });
+
+            document.getElementById('btnSync').addEventListener('click', syncCloudDatastore);
+            document.getElementById('entryForm').addEventListener('submit', handleFormSubmission);
+            document.getElementById('btnCancelEdit').addEventListener('click', revertFormStateToCreate);
         }
 
-        let today = new Date();
-        let currentDate = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
-        
-        let fixedDeduction = 100;
-        let remaining = total - challan - fixedDeduction;
+        function triggerSystemNotice(msg, variant = 'success') {
+            const icon = variant === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+            toastElement.className = `toast align-items-center text-white border-0 bg-${variant === 'success' ? 'success' : 'danger'}`;
+            document.getElementById('toastMessage').innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
+            bsToast.show();
+        }
 
-        let newEntry = {
-            date: currentDate,
-            name: name,
-            docType: docType,
-            total: total,
-            challan: challan,
-            fixed: fixedDeduction,
-            remaining: remaining
-        };
+        function setGlobalProcessingOverlay(state) {
+            if (state) loaderOverlay.classList.add('show');
+            else loaderOverlay.classList.remove('show');
+        }
 
-        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
-        entries.push(newEntry);
-        localStorage.setItem("hisabEntries", JSON.stringify(entries));
-
-        if(GOOGLE_SHEET_URL !== "https://script.google.com/macros/s/AKfycbwYeG6ax1D30aam-DLL4hjBINUi8zoNvMZXc3r4iEBfLGsCRgLfBuy-35n0-NgMhBIe/exec") {
-            document.getElementById("saveBtn").innerText = "सेव हो रहा है...";
-            fetch(GOOGLE_SHEET_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(newEntry)
-            }).then(() => {
-                document.getElementById("saveBtn").innerText = "कैलकुलेट और सेव करें";
-            }).catch(err => {
-                console.error("Google Sheet Error", err);
-                document.getElementById("saveBtn").innerText = "कैलकुलेट और सेव करें";
+        function registerDynamicFormulaObservers() {
+            document.querySelectorAll('.formula-input').forEach(element => {
+                element.addEventListener('input', runFinancialFormulaProcessor);
             });
         }
 
-        document.getElementById("appName").value = "";
-        document.getElementById("docType").value = "";
-        document.getElementById("totalAmt").value = "";
-        document.getElementById("challanAmt").value = "";
-        displayData();
-    }
+        function runFinancialFormulaProcessor() {
+            const total = parseFloat(document.getElementById('formTotalAmount').value) || 0;
+            const challan = parseFloat(document.getElementById('formChallanAmount').value) || 0;
+            const perChallan = parseFloat(document.getElementById('formPerChallanAmount').value) || 0;
 
-    function displayData() {
-        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
-        let tableHTML = "";
-        entries.forEach(function(entry) {
-            tableHTML += `<tr>
-                <td>${entry.date}</td>
-                <td>${entry.name}</td>
-                <td>${entry.docType}</td>
-                <td>₹${entry.total}</td>
-                <td>₹${entry.challan}</td>
-                <td>₹${entry.fixed}</td>
-                <td class="rem-amt">₹${entry.remaining}</td>
-            </tr>`;
-        });
-        if(entries.length === 0) {
-            tableHTML = `<tr><td colspan="7" style="color: #9ca3af; padding: 20px;">कोई डेटा उपलब्ध नहीं है</td></tr>`;
+            const trackingCalculatedNetValue = total - challan - perChallan;
+            document.getElementById('formReceivedAmount').value = trackingCalculatedNetValue.toFixed(2);
         }
-        document.getElementById("entryTable").innerHTML = tableHTML;
-    }
 
-    function downloadExcel() {
-        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
-        if(entries.length === 0) { alert("डाउनलोड करने के लिए कोई डेटा नहीं है!"); return; }
-
-        let csvContent = "\uFEFFदिनांक,आवेदक का नाम,दस्तावेज़ का प्रकार,कुल राशि,चालान राशि,फिक्स कटौती,बची हुई राशि\n";
-        entries.forEach(function(entry) {
-            csvContent += `"${entry.date}","${entry.name}","${entry.docType}","${entry.total}","${entry.challan}","${entry.fixed}","${entry.remaining}"\n`;
-        });
-        
-        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        link.setAttribute("href", URL.createObjectURL(blob));
-        link.setAttribute("download", "Hisab_" + new Date().toISOString().slice(0,10) + ".csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    // नया, सुरक्षित और 100% काम करने वाला PDF तरीका
-    function downloadPDF() {
-        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
-        if(entries.length === 0) { alert("PDF बनाने के लिए कोई डेटा नहीं है!"); return; }
-
-        let printWindow = window.open('', '', 'height=800,width=1000');
-        printWindow.document.write('<html><head><title>हिसाब PDF</title>');
-        printWindow.document.write('<style>');
-        printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }');
-        printWindow.document.write('h2 { text-align: center; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 10px; }');
-        printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }');
-        printWindow.document.write('th, td { border: 1px solid black; padding: 10px; text-align: center; }');
-        printWindow.document.write('th { background-color: #f2f2f2; font-weight: bold; }');
-        printWindow.document.write('</style></head><body>');
-        
-        printWindow.document.write('<h2>रोज़ का हिसाब</h2>');
-        printWindow.document.write('<table>');
-        printWindow.document.write('<thead><tr><th>दिनांक</th><th>नाम</th><th>दस्तावेज़</th><th>कुल राशि</th><th>चालान</th><th>फिक्स (Fix)</th><th>बची राशि</th></tr></thead>');
-        printWindow.document.write('<tbody>');
-        
-        entries.forEach(function(entry) {
-            printWindow.document.write(`<tr>
-                <td>${entry.date}</td>
-                <td>${entry.name}</td>
-                <td>${entry.docType}</td>
-                <td>₹${entry.total}</td>
-                <td>₹${entry.challan}</td>
-                <td>₹${entry.fixed}</td>
-                <td style="font-weight: bold; color: #b91c1c;">₹${entry.remaining}</td>
-            </tr>`);
-        });
-        
-        printWindow.document.write('</tbody></table>');
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        
-        // प्रिंट कमांड (यह पेज लोड होते ही 'Save as PDF' का ऑप्शन देगा)
-        setTimeout(function() {
-            printWindow.print();
-        }, 300);
-    }
-
-    function clearData() {
-        if(confirm("क्या आप सच में सारा पुराना हिसाब डिलीट करना चाहते हैं?")) {
-            localStorage.removeItem("hisabEntries");
-            displayData();
+        function loadCachedDatastore() {
+            const cache = localStorage.getItem('fin_dashboard_cache');
+            if (cache) {
+                localCacheMemory = JSON.parse(cache);
+                renderDataMatrixGrid();
+            }
         }
-    }
-</script>
+
+        function saveDatastoreToLocalStorageCache(data) {
+            localCacheMemory = data;
+            localStorage.setItem('fin_dashboard_cache', JSON.stringify(data));
+            renderDataMatrixGrid();
+        }
+
+        async function syncCloudDatastore() {
+            setGlobalProcessingOverlay(true);
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=read`, { method: 'GET', mode: 'cors' });
+                if(!response.ok) throw new Error("Network Handshake Faulted");
+                const parsedPayload = await response.json();
+                
+                if (parsedPayload.status === "success") {
+                    saveDatastoreToLocalStorageCache(parsedPayload.data);
+                    triggerSystemNotice("Cloud Database synchronized successfully.");
+                } else {
+                    throw new Error(parsedPayload.message || "Unknown Platform Execution Error");
+                }
+            } catch (error) {
+                triggerSystemNotice(`Sync Failure: ${error.message}. Running local runtime mode.`, 'danger');
+            } finally {
+                setGlobalProcessingOverlay(false);
+            }
+        }
+
+        async function handleFormSubmission(e) {
+            e.preventDefault();
+            if (executionLockState) return;
+
+            const form = document.getElementById('entryForm');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                triggerSystemNotice("Validation Failed. Please complete all required inputs.", 'danger');
+                return;
+            }
+
+            const total = parseFloat(document.getElementById('formTotalAmount').value) || 0;
+            const challan = parseFloat(document.getElementById('formChallanAmount').value) || 0;
+            const perChallan = parseFloat(document.getElementById('formPerChallanAmount').value) || 0;
+            const status = document.getElementById('formStatus').value;
+
+            const receivedAmount = total - challan - perChallan;
+            const pendingAmount = status === 'Pending' ? receivedAmount : 0;
+
+            const recordPayload = {
+                Timestamp: document.getElementById('recordTimestamp').value || new Date().toISOString(),
+                Date: formatDateOutputString(document.getElementById('formDate').value),
+                ApplicantName: document.getElementById('formApplicantName').value.trim(),
+                BankName: document.getElementById('formBankName').value.trim(),
+                TotalAmount: total,
+                ChallanAmount: challan,
+                PerChallanAmount: perChallan,
+                ReceivedAmount: receivedAmount,
+                Status: status,
+                PendingAmount: pendingAmount
+            };
+
+            // Prevent Client-Side Duplicate Check Layer
+            const isDuplicate = localCacheMemory.some((rec, index) => {
+                if (document.getElementById('editIndex').value !== "" && index === parseInt(document.getElementById('editIndex').value)) return false;
+                return rec.ApplicantName.toLowerCase() === recordPayload.ApplicantName.toLowerCase() && 
+                       rec.BankName.toLowerCase() === recordPayload.BankName.toLowerCase() && 
+                       rec.Date === recordPayload.Date && 
+                       parseFloat(rec.TotalAmount) === recordPayload.TotalAmount;
+            });
+
+            if (isDuplicate) {
+                triggerSystemNotice("Duplicate execution rejected: Exact profile parameters already logged.", 'danger');
+                return;
+            }
+
+            executionLockState = true;
+            setGlobalProcessingOverlay(true);
+
+            const isEditMode = document.getElementById('editIndex').value !== "";
+            const queryActionParam = isEditMode ? "update" : "create";
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=${queryActionParam}`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(recordPayload)
+                });
+                
+                const serverReply = await response.json();
+                if (serverReply.status === "success") {
+                    triggerSystemNotice(isEditMode ? "Record successfully adjusted down-stream." : "Record saved directly to cloud ledger.");
+                    revertFormStateToCreate();
+                    await syncCloudDatastore();
+                } else {
+                    throw new Error(serverReply.message);
+                }
+            } catch (err) {
+                triggerSystemNotice(`Database update failed: ${err.message}`, 'danger');
+            } finally {
+                executionLockState = false;
+                setGlobalProcessingOverlay(false);
+            }
+        }
+
+        async function inititateRemoteDeleteLifecycle(targetTimestamp) {
+            if (!confirm("Are you certain you wish to irreversibly delete this entry from cloud?")) return;
+            setGlobalProcessingOverlay(true);
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=delete`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ Timestamp: targetTimestamp })
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    triggerSystemNotice("Record completely removed from architectural layer.");
+                    await syncCloudDatastore();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                triggerSystemNotice(`Deletion failed: ${error.message}`, 'danger');
+            } finally {
+                setGlobalProcessingOverlay(false);
+            }
+        }
+
+        function populateFieldsForCorrection(localIndex) {
+            const dataRecord = localCacheMemory[localIndex];
+            document.getElementById('editIndex').value = localIndex;
+            document.getElementById('recordTimestamp').value = dataRecord.Timestamp;
+            
+            const structuralDateParts = dataRecord.Date.split('/');
+            if(structuralDateParts.length === 3) {
+                document.getElementById('formDate').value = `${structuralDateParts[2]}-${structuralDateParts[1]}-${structuralDateParts[0]}`;
+            }
+
+            document.getElementById('formApplicantName').value = dataRecord.ApplicantName;
+            document.getElementById('formBankName').value = dataRecord.BankName;
+            document.getElementById('formTotalAmount').value = dataRecord.TotalAmount;
+            document.getElementById('formChallanAmount').value = dataRecord.ChallanAmount;
+            document.getElementById('formPerChallanAmount').value = dataRecord.PerChallanAmount;
+            document.getElementById('formStatus').value = dataRecord.Status;
+            
+            runFinancialFormulaProcessor();
+
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-file-pen me-2 text-warning"></i>Modify Existing Entry`;
+            document.getElementById('btnSubmitForm').className = "btn btn-warning p-2 fw-semibold";
+            document.getElementById('btnSubmitForm').innerText = "Apply Corrections";
+            document.getElementById('btnCancelEdit').classList.remove('d-none');
+            
+            document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function revertFormStateToCreate() {
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryForm').classList.remove('was-validated');
+            document.getElementById('editIndex').value = "";
+            document.getElementById('recordTimestamp').value = "";
+            document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-square-plus me-2 text-primary"></i>Create New Entry`;
+            document.getElementById('btnSubmitForm').className = "btn btn-success p-2 fw-semibold";
+            document.getElementById('btnSubmitForm').innerText = "Commit Entry";
+            document.getElementById('btnCancelEdit').classList.add('d-none');
+        }
+
+        function renderDataMatrixGrid() {
+            const tbody = document.getElementById('dataGridBody');
+            tbody.innerHTML = "";
+
+            const filterApp = document.getElementById('filterApplicant').value.toLowerCase();
+            const filterBnk = document.getElementById('filterBank').value.toLowerCase();
+            const filterStat = document.getElementById('filterStatus').value;
+            const startDateVal = document.getElementById('filterStartDate').value;
+            const endDateVal = document.getElementById('filterEndDate').value;
+
+            let aggregEntriesCount = 0;
+            let sumTotalAmount = 0;
+            let sumReceivedAmount = 0;
+            let sumPendingAmount = 0;
+
+            localCacheMemory.forEach((record, arrayIndex) => {
+                const pDateStr = record.Date.split('/');
+                const dateCompareObject = new Date(`${pDateStr[2]}-${pDateStr[1]}-${pDateStr[0]}`);
+
+                if (filterApp && !record.ApplicantName.toLowerCase().includes(filterApp)) return;
+                if (filterBnk && !record.BankName.toLowerCase().includes(filterBnk)) return;
+                if (filterStat && record.Status !== filterStat) return;
+                
+                if (startDateVal && dateCompareObject < new Date(startDateVal)) return;
+                if (endDateVal) {
+                    const trackingEndWindow = new Date(endDateVal);
+                    trackingEndWindow.setHours(23,59,59,999);
+                    if (dateCompareObject > trackingEndWindow) return;
+                }
+
+                aggregEntriesCount++;
+                sumTotalAmount += parseFloat(record.TotalAmount) || 0;
+                sumReceivedAmount += parseFloat(record.ReceivedAmount) || 0;
+                sumPendingAmount += parseFloat(record.PendingAmount) || 0;
+
+                const tableRowHtml = `
+                    <tr>
+                        <td class="text-center px-3 font-monospace text-secondary">${aggregEntriesCount}</td>
+                        <td class="fw-semibold text-nowrap">${record.Date}</td>
+                        <td class="fw-bold text-dark">${record.ApplicantName}</td>
+                        <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">${record.BankName}</span></td>
+                        <td class="text-end font-monospace fw-semibold">₹${parseFloat(record.TotalAmount).toFixed(2)}</td>
+                        <td class="text-end font-monospace text-muted">₹${parseFloat(record.ChallanAmount).toFixed(2)}</td>
+                        <td class="text-end font-monospace text-muted">₹${parseFloat(record.PerChallanAmount).toFixed(2)}</td>
+                        <td class="text-end font-monospace text-success fw-bold">₹${parseFloat(record.ReceivedAmount).toFixed(2)}</td>
+                        <td class="text-center">
+                            <span class="badge ${record.Status === 'Received' ? 'bg-success' : 'bg-warning text-dark'} text-uppercase px-2 py-1 small">
+                                ${record.Status}
+                            </span>
+                        </td>
+                        <td class="text-end font-monospace text-danger fw-bold">₹${parseFloat(record.PendingAmount).toFixed(2)}</td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary px-2" onclick="populateFieldsForCorrection(${arrayIndex})"><i class="fa-solid fa-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger px-2" onclick="inititateRemoteDeleteLifecycle('${record.Timestamp}')"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', tableRowHtml);
+            });
+
+            document.getElementById('card-total-entries').innerText = aggregEntriesCount;
+            document.getElementById('card-total-amount').innerText = `₹${sumTotalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+            document.getElementById('card-total-received').innerText = `₹${sumReceivedAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+            document.getElementById('card-total-pending').innerText = `₹${sumPendingAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        function formatDateOutputString(inputRawDateStr) {
+            if(!inputRawDateStr) return "";
+            const parts = inputRawDateStr.split('-');
+            if(parts.length !== 3) return inputRawDateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function exportData(formatType) {
+            if(localCacheMemory.length === 0) {
+                triggerSystemNotice("Operation Aborted: System datastore is empty.", 'danger');
+                return;
+            }
+
+            const exportHeaders = ["S.N.", "Date", "Applicant Name", "Bank Name", "Total Amount", "Challan Amount", "Per Challan Amount", "Received Amount", "Status", "Pending Amount"];
+            const rawTableRows = document.querySelectorAll("#dataGridBody tr");
+            const compiledDatasetRows = [];
+
+            rawTableRows.forEach((row, i) => {
+                const cells = row.querySelectorAll("td");
+                if(cells.length === 0) return;
+                compiledDatasetRows.push([
+                    i + 1,
+                    cells[1].innerText,
+                    cells[2].innerText,
+                    cells[3].innerText,
+                    cells[4].innerText.replace('₹', '').replace(/,/g, ''),
+                    cells[5].innerText.replace('₹', '').replace(/,/g, ''),
+                    cells[6].innerText.replace('₹', '').replace(/,/g, ''),
+                    cells[7].innerText.replace('₹', '').replace(/,/g, ''),
+                    cells[8].innerText.trim(),
+                    cells[9].innerText.replace('₹', '').replace(/,/g, '')
+                ]);
+            });
+
+            if(formatType === 'excel') {
+                const ws = XLSX.utils.aoa_to_sheet([exportHeaders, ...compiledDatasetRows]);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Financial Report");
+                XLSX.writeFile(wb, `Financial_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+            } 
+            else if(formatType === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const pdfDoc = new jsPDF('l', 'mm', 'a4');
+                pdfDoc.text("Financial System Audit Logs", 14, 15);
+                pdfDoc.setFontSize(9);
+                pdfDoc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 20);
+                
+                pdfDoc.autoTable({
+                    head: [exportHeaders],
+                    body: compiledDatasetRows,
+                    startY: 25,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [30, 30, 45] }
+                });
+                pdfDoc.save(`Audit_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+            } 
+            else if(formatType === 'print') {
+                window.print();
+            }
+        }
+    </script>
 </body>
 </html>
