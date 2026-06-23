@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>रोज़ का हिसाब - एडवांस्ड कैलकुलेटर</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; margin: 0;}
+        .container { max-width: 900px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin: 20px auto; }
+        h2 { text-align: center; color: #1e3a8a; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #4b5563; }
+        input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+        button { flex: 1; padding: 12px; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; min-width: 150px; }
+        .btn-save { background: #2563eb; } .btn-save:hover { background: #1d4ed8; }
+        .btn-excel { background: #10b981; } .btn-excel:hover { background: #059669; }
+        .btn-pdf { background: #d97706; } .btn-pdf:hover { background: #b45309; }
+        .btn-clear { background: #ef4444; } .btn-clear:hover { background: #dc2626; }
+        
+        .table-wrapper { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px; border: 1px solid #e5e7eb; text-align: center; color: #000; }
+        th { background-color: #f3f4f6; color: #1f2937; }
+        .rem-amt { font-weight: bold; color: #b91c1c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>रोज़ का हिसाब कैलकुलेटर</h2>
+    
+    <div class="form-group">
+        <label>Applicant Name (आवेदक का नाम)</label>
+        <input type="text" id="appName" placeholder="नाम दर्ज करें">
+    </div>
+    
+    <div class="form-group">
+        <label>Type of Document (दस्तावेज़ का प्रकार)</label>
+        <input type="text" id="docType" placeholder="जैसे: सेल डीड, गिफ्ट डीड, एमोडिटी, एमोडी, रिलीज डीड...">
+    </div>
+
+    <div class="form-group">
+        <label>Total Amount (कुल राशि - ₹)</label>
+        <input type="number" id="totalAmt" placeholder="0.00">
+    </div>
+    
+    <div class="form-group">
+        <label>Challan Amount (चालान राशि - ₹)</label>
+        <input type="number" id="challanAmt" placeholder="0.00">
+    </div>
+
+    <div class="btn-container">
+        <button class="btn-save" onclick="calculateAndSave()" id="saveBtn">कैलकुलेट और सेव करें</button>
+        <button class="btn-excel" onclick="downloadExcel()">एक्सेल डाउनलोड</button>
+        <button class="btn-pdf" onclick="downloadPDF()">पीडीएफ (PDF) डाउनलोड</button>
+        <button class="btn-clear" onclick="clearData()">डेटा साफ करें</button>
+    </div>
+
+    <div class="table-wrapper">
+        <h3 style="color: #374151; text-align: center; margin-top: 0;">सेव किया गया हिसाब</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>दिनांक</th>
+                    <th>नाम</th>
+                    <th>दस्तावेज़</th>
+                    <th>कुल राशि</th>
+                    <th>चालान</th>
+                    <th>फिक्स (Fix)</th>
+                    <th>बची राशि</th>
+                </tr>
+            </thead>
+            <tbody id="entryTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_SHEET_URL = "यहाँ_अपना_GOOGLE_SCRIPT_URL_डालें"; 
+
+    window.onload = function() { displayData(); };
+
+    function calculateAndSave() {
+        let name = document.getElementById("appName").value.trim();
+        let docType = document.getElementById("docType").value.trim();
+        let total = parseFloat(document.getElementById("totalAmt").value);
+        let challan = parseFloat(document.getElementById("challanAmt").value);
+
+        if(!name || !docType || isNaN(total) || isNaN(challan)) {
+            alert("कृपया सभी जानकारी सही से भरें!");
+            return;
+        }
+
+        let today = new Date();
+        let currentDate = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+        
+        let fixedDeduction = 100;
+        let remaining = total - challan - fixedDeduction;
+
+        let newEntry = {
+            date: currentDate,
+            name: name,
+            docType: docType,
+            total: total,
+            challan: challan,
+            fixed: fixedDeduction,
+            remaining: remaining
+        };
+
+        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
+        entries.push(newEntry);
+        localStorage.setItem("hisabEntries", JSON.stringify(entries));
+
+        if(GOOGLE_SHEET_URL !== "यहाँ_अपना_GOOGLE_SCRIPT_URL_डालें") {
+            document.getElementById("saveBtn").innerText = "सेव हो रहा है...";
+            fetch(GOOGLE_SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(newEntry)
+            }).then(() => {
+                document.getElementById("saveBtn").innerText = "कैलकुलेट और सेव करें";
+            }).catch(err => {
+                console.error("Google Sheet Error", err);
+                document.getElementById("saveBtn").innerText = "कैलकुलेट और सेव करें";
+            });
+        }
+
+        document.getElementById("appName").value = "";
+        document.getElementById("docType").value = "";
+        document.getElementById("totalAmt").value = "";
+        document.getElementById("challanAmt").value = "";
+        displayData();
+    }
+
+    function displayData() {
+        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
+        let tableHTML = "";
+        entries.forEach(function(entry) {
+            tableHTML += `<tr>
+                <td>${entry.date}</td>
+                <td>${entry.name}</td>
+                <td>${entry.docType}</td>
+                <td>₹${entry.total}</td>
+                <td>₹${entry.challan}</td>
+                <td>₹${entry.fixed}</td>
+                <td class="rem-amt">₹${entry.remaining}</td>
+            </tr>`;
+        });
+        if(entries.length === 0) {
+            tableHTML = `<tr><td colspan="7" style="color: #9ca3af; padding: 20px;">कोई डेटा उपलब्ध नहीं है</td></tr>`;
+        }
+        document.getElementById("entryTable").innerHTML = tableHTML;
+    }
+
+    function downloadExcel() {
+        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
+        if(entries.length === 0) { alert("डाउनलोड करने के लिए कोई डेटा नहीं है!"); return; }
+
+        let csvContent = "\uFEFFदिनांक,आवेदक का नाम,दस्तावेज़ का प्रकार,कुल राशि,चालान राशि,फिक्स कटौती,बची हुई राशि\n";
+        entries.forEach(function(entry) {
+            csvContent += `"${entry.date}","${entry.name}","${entry.docType}","${entry.total}","${entry.challan}","${entry.fixed}","${entry.remaining}"\n`;
+        });
+        
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement("a");
+        link.setAttribute("href", URL.createObjectURL(blob));
+        link.setAttribute("download", "Hisab_" + new Date().toISOString().slice(0,10) + ".csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // नया, सुरक्षित और 100% काम करने वाला PDF तरीका
+    function downloadPDF() {
+        let entries = JSON.parse(localStorage.getItem("hisabEntries")) || [];
+        if(entries.length === 0) { alert("PDF बनाने के लिए कोई डेटा नहीं है!"); return; }
+
+        let printWindow = window.open('', '', 'height=800,width=1000');
+        printWindow.document.write('<html><head><title>हिसाब PDF</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }');
+        printWindow.document.write('h2 { text-align: center; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 10px; }');
+        printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }');
+        printWindow.document.write('th, td { border: 1px solid black; padding: 10px; text-align: center; }');
+        printWindow.document.write('th { background-color: #f2f2f2; font-weight: bold; }');
+        printWindow.document.write('</style></head><body>');
+        
+        printWindow.document.write('<h2>रोज़ का हिसाब</h2>');
+        printWindow.document.write('<table>');
+        printWindow.document.write('<thead><tr><th>दिनांक</th><th>नाम</th><th>दस्तावेज़</th><th>कुल राशि</th><th>चालान</th><th>फिक्स (Fix)</th><th>बची राशि</th></tr></thead>');
+        printWindow.document.write('<tbody>');
+        
+        entries.forEach(function(entry) {
+            printWindow.document.write(`<tr>
+                <td>${entry.date}</td>
+                <td>${entry.name}</td>
+                <td>${entry.docType}</td>
+                <td>₹${entry.total}</td>
+                <td>₹${entry.challan}</td>
+                <td>₹${entry.fixed}</td>
+                <td style="font-weight: bold; color: #b91c1c;">₹${entry.remaining}</td>
+            </tr>`);
+        });
+        
+        printWindow.document.write('</tbody></table>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        // प्रिंट कमांड (यह पेज लोड होते ही 'Save as PDF' का ऑप्शन देगा)
+        setTimeout(function() {
+            printWindow.print();
+        }, 300);
+    }
+
+    function clearData() {
+        if(confirm("क्या आप सच में सारा पुराना हिसाब डिलीट करना चाहते हैं?")) {
+            localStorage.removeItem("hisabEntries");
+            displayData();
+        }
+    }
+</script>
+</body>
+</html>
