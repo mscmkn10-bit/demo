@@ -113,7 +113,7 @@
         entries.push(newEntry);
         localStorage.setItem("hisabEntries", JSON.stringify(entries));
 
-        if(GOOGLE_SHEET_URL !== "यहाँ_अपना_GOOGLE_SCRIPT_URL_डालें") {
+        if(GOOGLE_SHEET_URL !== "https://script.google.com/macros/s/AKfycbwYeG6ax1D30aam-DLL4hjBINUi8zoNvMZXc3r4iEBfLGsCRgLfBuy-35n0-NgMhBIe/exec") {
             document.getElementById("saveBtn").innerText = "सेव हो रहा है...";
             fetch(GOOGLE_SHEET_URL, {
                 method: "POST",
