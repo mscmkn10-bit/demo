@@ -276,7 +276,6 @@
             return dateString;
         }
 
-        // Helper translating returned display dates back into system calendar strings (YYYY-MM-DD)
         function formatInputDate(dateStr) {
             if(!dateStr) return '';
             if(dateStr.includes('-')) return dateStr;
@@ -314,37 +313,38 @@
             let netReceived = status === "Received" ? netCalc : 0;
             let pending = status === "Pending" ? netCalc : 0;
 
+            let finalRecordId = editId ? parseInt(editId) : Date.now();
+            let syncAction = editId ? "UPDATE" : "INSERT";
+
+            let currentRecord = {
+                id: finalRecordId,
+                date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
+            };
+
             if (editId) {
-                // UPDATE EXISITING RECORD
                 let recordIndex = records.findIndex(r => r.id == editId);
                 if (recordIndex !== -1) {
-                    records[recordIndex] = {
-                        id: parseInt(editId),
-                        date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
-                    };
+                    records[recordIndex] = currentRecord;
                 }
             } else {
-                // CREATE NEW RECORD
-                let newRecord = {
-                    id: Date.now(),
-                    date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
-                };
-                records.push(newRecord);
+                records.push(currentRecord);
             }
 
             localStorage.setItem('finDashRecords', JSON.stringify(records));
 
-            // Sync structural save upstream to Spreadsheet
+            // CRITICAL CORS BYPASS FIX: data content explicitly sent as text/plain
             if (APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({
-                        action: editId ? "UPDATE" : "INSERT",
-                        record: { id: editId ? parseInt(editId) : Date.now(), date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status }
+                        action: syncAction,
+                        record: currentRecord
                     })
-                }).catch(err => console.error("Cloud push failed:", err));
+                })
+                .then(() => console.log("Cloud sync successful"))
+                .catch(err => console.error("Cloud push failed:", err));
             }
 
             resetFormState();
@@ -361,7 +361,6 @@
             document.getElementById('submitBtn').style.backgroundColor = "#10b981";
         }
 
-        // Pull row items into form for modifications
         function startEditEntry(id) {
             let record = records.find(r => r.id == id);
             if (!record) return;
@@ -383,7 +382,6 @@
             document.getElementById('submitBtn').innerText = "Update Entry";
             document.getElementById('submitBtn').style.backgroundColor = "#f59e0b";
             
-            // Auto scroll to form field dynamically on viewport layout
             document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -437,7 +435,7 @@
             records = records.filter(r => r.id !== id);
             localStorage.setItem('finDashRecords', JSON.stringify(records)); 
             
-            if (APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+            if (APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbywmANxahqhrUCpdeT25PAIS8wpcYHwhv20BOpoxbLdFavO1jlJSQBkjBdWGR-67o2Z/exec") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -451,7 +449,7 @@
         }
 
         function fetchFromCloud() {
-            if (APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwGWmohJ4tKxB0RTsrTlTZzw14b_sMgQW-T4yNuimUtWDMOWysSWTxUfHSVEw3S-i32/exec") {
+            if (APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 alert("Please add your deployed Apps Script Web App URL.");
                 return;
             }
