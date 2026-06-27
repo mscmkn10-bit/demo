@@ -76,6 +76,8 @@
         .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
         .badge-pending { background-color: #fef3c7; color: #d97706; }
         .badge-received { background-color: #d1fae5; color: #059669; }
+        .btn-edit { background-color: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; font-weight: bold; }
+        .btn-edit:hover { background-color: #d97706; }
         .btn-delete { background-color: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         
         /* Backdrop overlay for mobile menu view */
@@ -159,8 +161,10 @@
         </div>
 
         <div class="section-container" id="form-section">
-            <h5>Create Entry</h5>
+            <h5 id="formTitle">Create Entry</h5>
             <form id="recordForm">
+                <input type="hidden" id="editRecordId" value="">
+                
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Execution Date</label>
@@ -207,8 +211,8 @@
                     </div>
                 </div>
                 <div class="btn-group">
-                    <button type="submit" class="btn-commit">Commit Entry</button>
-                    <button type="reset" class="btn-cancel" onclick="document.getElementById('netCalc').value=''">Cancel Correction</button>
+                    <button type="submit" class="btn-commit" id="submitBtn">Commit Entry</button>
+                    <button type="button" class="btn-cancel" onclick="resetFormState()">Cancel Correction</button>
                 </div>
             </form>
         </div>
@@ -253,7 +257,6 @@
         const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
         let records = JSON.parse(localStorage.getItem('finDashRecords')) || [];
 
-        /* Mobile Layout Menu Handlers */
         function toggleMobileMenu() {
             document.getElementById('sidebarMenu').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -263,7 +266,6 @@
             document.getElementById('sidebarOverlay').classList.remove('active');
         }
 
-        /* Clean Date Formatting Helper (DD/MM/YYYY) */
         function formatDisplayDate(dateString) {
             if(!dateString) return '';
             if(dateString.includes('/')) return dateString; 
@@ -272,6 +274,17 @@
                 return `${parts[2]}/${parts[1]}/${parts[0]}`;
             }
             return dateString;
+        }
+
+        // Helper translating returned display dates back into system calendar strings (YYYY-MM-DD)
+        function formatInputDate(dateStr) {
+            if(!dateStr) return '';
+            if(dateStr.includes('-')) return dateStr;
+            const parts = dateStr.split('/');
+            if(parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return dateStr;
         }
 
         function calculateNet() {
@@ -286,6 +299,7 @@
         document.getElementById('recordForm').addEventListener('submit', function(e) {
             e.preventDefault(); 
 
+            let editId = document.getElementById('editRecordId').value;
             let date = document.getElementById('date').value;
             let name = document.getElementById('name').value;
             let bank = document.getElementById('bank').value;
@@ -300,29 +314,78 @@
             let netReceived = status === "Received" ? netCalc : 0;
             let pending = status === "Pending" ? netCalc : 0;
 
-            let newRecord = {
-                id: Date.now(),
-                date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
-            };
+            if (editId) {
+                // UPDATE EXISITING RECORD
+                let recordIndex = records.findIndex(r => r.id == editId);
+                if (recordIndex !== -1) {
+                    records[recordIndex] = {
+                        id: parseInt(editId),
+                        date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
+                    };
+                }
+            } else {
+                // CREATE NEW RECORD
+                let newRecord = {
+                    id: Date.now(),
+                    date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
+                };
+                records.push(newRecord);
+            }
 
-            records.push(newRecord);
             localStorage.setItem('finDashRecords', JSON.stringify(records));
 
+            // Sync structural save upstream to Spreadsheet
             if (APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newRecord)
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: editId ? "UPDATE" : "INSERT",
+                        record: { id: editId ? parseInt(editId) : Date.now(), date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status }
+                    })
                 }).catch(err => console.error("Cloud push failed:", err));
             }
 
-            this.reset();
-            document.getElementById('netCalc').value = '';
-            
+            resetFormState();
             updateDashboard();
             renderTable();
         });
+
+        function resetFormState() {
+            document.getElementById('recordForm').reset();
+            document.getElementById('editRecordId').value = '';
+            document.getElementById('netCalc').value = '';
+            document.getElementById('formTitle').innerText = "Create Entry";
+            document.getElementById('submitBtn').innerText = "Commit Entry";
+            document.getElementById('submitBtn').style.backgroundColor = "#10b981";
+        }
+
+        // Pull row items into form for modifications
+        function startEditEntry(id) {
+            let record = records.find(r => r.id == id);
+            if (!record) return;
+
+            document.getElementById('editRecordId').value = record.id;
+            document.getElementById('date').value = formatInputDate(record.date);
+            document.getElementById('name').value = record.name;
+            document.getElementById('bank').value = record.bank;
+            document.getElementById('loanAmount').value = record.loanAmount || 0;
+            document.getElementById('totalBase').value = record.total;
+            document.getElementById('challanOut').value = record.challan;
+            document.getElementById('fee').value = record.fee;
+            document.getElementById('commission').value = record.commission || 0;
+            document.getElementById('status').value = record.status;
+            
+            calculateNet();
+
+            document.getElementById('formTitle').innerText = "Modify Existing Entry";
+            document.getElementById('submitBtn').innerText = "Update Entry";
+            document.getElementById('submitBtn').style.backgroundColor = "#f59e0b";
+            
+            // Auto scroll to form field dynamically on viewport layout
+            document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+        }
 
         function updateDashboard() {
             let totalEntries = records.length;
@@ -359,21 +422,36 @@
                     <td>₹${record.netReceived}</td>
                     <td>₹${record.pending}</td>
                     <td><span class="badge ${badgeClass}">${record.status}</span></td>
-                    <td><button class="btn-delete" onclick="deleteEntry(${record.id})">Delete</button></td>
+                    <td>
+                        <button class="btn-edit" onclick="startEditEntry(${record.id})">Edit</button>
+                        <button class="btn-delete" onclick="deleteEntry(${record.id})">Delete</button>
+                    </td>
                 </tr>`;
                 tbody.innerHTML += tr;
             });
         }
 
         function deleteEntry(id) {
+            if(!confirm("Are you sure you want to remove this record?")) return;
+            
             records = records.filter(r => r.id !== id);
             localStorage.setItem('finDashRecords', JSON.stringify(records)); 
+            
+            if (APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+                fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: "DELETE", record: { id: id } })
+                }).catch(err => console.error("Cloud push failed:", err));
+            }
+
             updateDashboard();
             renderTable();
         }
 
         function fetchFromCloud() {
-            if (APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbw7vJ_z01-DrhVyyWh3xlskTw0OHjmNF-vQvth_jFYmVCeMMwggynNPc2GomgqisW69MA/exec") {
+            if (APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwGWmohJ4tKxB0RTsrTlTZzw14b_sMgQW-T4yNuimUtWDMOWysSWTxUfHSVEw3S-i32/exec") {
                 alert("Please add your deployed Apps Script Web App URL.");
                 return;
             }
@@ -402,14 +480,11 @@
                 });
         }
 
-        /* ONE-CLICK EXCEL DOWNLOAD FUNCTION */
         function downloadExcel() {
             if (records.length === 0) {
                 alert("No data available to download.");
                 return;
             }
-            
-            // Format array for spreadsheet layout map
             const excelRows = records.map((r, index) => ({
                 "S.N.": index + 1,
                 "Date": formatDisplayDate(r.date),
@@ -428,21 +503,15 @@
             const worksheet = XLSX.utils.json_to_sheet(excelRows);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger Records");
-            
-            // Automatically adjust columns width size cleanly
-            const maxProps = [{wch:6}, {wch:12}, {wch:22}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:12}];
-            worksheet['!cols'] = maxProps;
-
+            worksheet['!cols'] = [{wch:6}, {wch:12}, {wch:22}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:12}];
             XLSX.writeFile(workbook, `Financial_Ledger_Records_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        /* ONE-CLICK PDF DOWNLOAD FUNCTION */
         function downloadPDF() {
             if (records.length === 0) {
                 alert("No data available to download.");
                 return;
             }
-            
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: "landscape", format: "a4" });
             
@@ -452,7 +521,6 @@
             doc.text(`Generated on: ${new Date().toLocaleDateString('en-GB')}`, 14, 22);
 
             const tableHeaders = [["S.N.", "Date", "Applicant", "Bank", "Loan Amt", "Total Base", "Challan Out", "Challan Fee", "Comm.", "Net Recv.", "Pending", "Status"]];
-            
             const tableRows = records.map((r, index) => [
                 index + 1,
                 formatDisplayDate(r.date),
@@ -477,11 +545,9 @@
                 headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
                 alternateRowStyles: { fillColor: [248, 250, 252] }
             });
-
             doc.save(`Financial_Ledger_Report_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
-        // On boot runtime executions
         updateDashboard();
         renderTable();
     </script>
