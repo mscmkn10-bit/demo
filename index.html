@@ -254,7 +254,7 @@
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzj-FZ3rAEGg-RzJm5-Y5c7RfdpGLaOeR1m2fcfDFlV5ZkPgDehFA9G85G4dXjUIWDV/exec";
         let records = JSON.parse(localStorage.getItem('finDashRecords')) || [];
 
         function toggleMobileMenu() {
@@ -316,9 +316,12 @@
             let finalRecordId = editId ? parseInt(editId) : Date.now();
             let syncAction = editId ? "UPDATE" : "INSERT";
 
+            // Enforce safe clean date formatting for local storage mapping
+            let formattedDisplayDateVal = formatDisplayDate(date);
+
             let currentRecord = {
                 id: finalRecordId,
-                date, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
+                date: formattedDisplayDateVal, name, bank, loanAmount, total, challan, fee, commission, netReceived, pending, status
             };
 
             if (editId) {
@@ -332,8 +335,8 @@
 
             localStorage.setItem('finDashRecords', JSON.stringify(records));
 
-            // CRITICAL CORS BYPASS FIX: data content explicitly sent as text/plain
-            if (APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+            // REST Check: Sends plain text stream payload upstream to sheet bypass CORS
+            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -435,13 +438,18 @@
             records = records.filter(r => r.id !== id);
             localStorage.setItem('finDashRecords', JSON.stringify(records)); 
             
-            if (APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbywmANxahqhrUCpdeT25PAIS8wpcYHwhv20BOpoxbLdFavO1jlJSQBkjBdWGR-67o2Z/exec") {
+            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ action: "DELETE", record: { id: id } })
-                }).catch(err => console.error("Cloud push failed:", err));
+                    body: JSON.stringify({ 
+                        action: "DELETE", 
+                        record: { id: id } 
+                    })
+                })
+                .then(() => console.log("Deleted from cloud successfully"))
+                .catch(err => console.error("Cloud delete failed:", err));
             }
 
             updateDashboard();
@@ -449,7 +457,7 @@
         }
 
         function fetchFromCloud() {
-            if (APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+            if (APPS_SCRIPT_URL === "" || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 alert("Please add your deployed Apps Script Web App URL.");
                 return;
             }
