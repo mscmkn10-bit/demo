@@ -94,7 +94,7 @@
 <body>
 
     <div class="sidebar">
-        <h4>GSCMKN</h4>
+        <h4>FinDash</h4>
         <a href="#">Overview Dashboard</a>
         <a href="#form-section">Transaction Form</a>
         <a href="#table-section">Database Records</a>
@@ -245,22 +245,21 @@
     </div>
 
     <script>
-        // REPLACE WITH YOUR APPS SCRIPT WEB APP URL
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLDHxpgvq70kWCiuE0DLS8ttCIDJHumiYQ2KjRwE343mbFsouz3EWWOyl8JVtKs_fL/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTNtRrGvjS_2Lh_Jf55cUvdrcLULiekRGKCGSFmgtzg5k4hMZToaszLbhM8YBCH0Xt/exec";
         let records = JSON.parse(localStorage.getItem('finDashRecords')) || [];
 
         function formatDisplayDate(dateString) {
             if(!dateString) return '';
-            // Agar ISO String format hai (eg. 2026-02-10T18:30:00.000Z)
             if(dateString.includes('T')) {
                 dateString = dateString.split('T')[0];
             }
-            if(dateString.includes('/')) return dateString; 
-            const parts = dateString.split('-');
-            if(parts.length === 3) {
-                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            if(dateString.includes('-')) {
+                const parts = dateString.split('-');
+                if(parts[0].length === 4) { // YYYY-MM-DD
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
             }
-            return dateString;
+            return dateString; // Agar pehle se hi DD/MM/YYYY hai
         }
 
         function formatInputDate(dateStr) {
@@ -269,13 +268,14 @@
                 dateStr = dateStr.split('T')[0];
             }
             if(dateStr.includes('-')) return dateStr;
-            const parts = dateStr.split('/');
-            if(parts.length === 3) {
-                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            if(dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // HTML input rules YYYY-MM-DD require karte hain
             }
             return dateStr;
         }
 
+        // FIXED: DD/MM/YYYY ko bina browser ambiguity ke secure aur index specific tarike se parse karne ke liye custom logic
         function parseToJsDate(dateStr) {
             if (!dateStr) return null;
             if(dateStr.includes('T')) {
@@ -283,9 +283,18 @@
             }
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                let d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                // parts[0]=DD, parts[1]=MM, parts[2]=YYYY. Month 0-indexed hota hai isliye -1
+                let d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
                 d.setHours(0,0,0,0);
                 return d;
+            }
+            if(dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if(parts[0].length === 4) { // YYYY-MM-DD
+                    let d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                    d.setHours(0,0,0,0);
+                    return d;
+                }
             }
             let d = new Date(dateStr);
             d.setHours(0,0,0,0);
