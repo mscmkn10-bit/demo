@@ -311,14 +311,19 @@
             return dateStr;
         }
 
-        // Helper translating standard dd/mm/yyyy display blocks safely to JS timestamps for comparisons
+        // Safe converter aligning saved DD/MM/YYYY records cleanly to timestamp formats
         function parseToJsDate(dateStr) {
             if (!dateStr) return null;
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                return new Date(parts[2], parts[1] - 1, parts[0]);
+                // parts[2]=Year, parts[1]=Month (0-indexed), parts[0]=Day
+                let d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                d.setHours(0,0,0,0);
+                return d;
             }
-            return new Date(dateStr);
+            let d = new Date(dateStr);
+            d.setHours(0,0,0,0);
+            return d;
         }
 
         function calculateNet() {
@@ -368,7 +373,7 @@
 
             localStorage.setItem('finDashRecords', JSON.stringify(records));
 
-            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbwtLzeXD7knHhtxqrsrX2S9ibSGVzHh9TipFfn2fG9HGj6RSyiOPTmj7wcnl3YSgFHL/exec") {
+            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -419,20 +424,27 @@
             document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // Core logic evaluating precise range comparisons for data filters
         function getFilteredData() {
             let startVal = document.getElementById('filterStartDate').value;
             let endVal = document.getElementById('filterEndDate').value;
             let statusFilter = document.getElementById('filterStatus').value;
 
-            let startDate = startVal ? new Date(startVal) : null;
-            let endDate = endVal ? new Date(endVal) : null;
-            if(endDate) endDate.setHours(23,59,59,999);
+            let startDate = null;
+            let endDate = null;
+
+            if (startVal) {
+                startDate = new Date(startVal);
+                startDate.setHours(0,0,0,0);
+            }
+            if (endVal) {
+                endDate = new Date(endVal);
+                endDate.setHours(23,59,59,999);
+            }
 
             return records.filter(r => {
-                // Status mapping evaluation
                 if (statusFilter !== "All" && r.status !== statusFilter) return false;
                 
-                // Timeline evaluation bounds
                 let recordDate = parseToJsDate(r.date);
                 if (recordDate) {
                     if (startDate && recordDate < startDate) return false;
@@ -517,7 +529,7 @@
         }
 
         function fetchFromCloud() {
-            if (APPS_SCRIPT_URL === "" || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+            if (APPS_SCRIPT_URL === "" || APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxyMqVf8lD5922SHkJqX4bXHoXd80MobNItNi0arIgDfvTFhPO1n8Z_HeOHE2lmHayT/exec") {
                 alert("Please add your deployed Apps Script Web App URL.");
                 return;
             }
