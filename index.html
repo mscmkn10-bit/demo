@@ -94,7 +94,7 @@
 <body>
 
     <div class="sidebar">
-        <h4>GSCMKN</h4>
+        <h4>FinDash</h4>
         <a href="#">Overview Dashboard</a>
         <a href="#form-section">Transaction Form</a>
         <a href="#table-section">Database Records</a>
@@ -245,12 +245,16 @@
     </div>
 
     <script>
-        // REPLACE WITH YOUR RE-DEPLOYED WEB APP URL
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzTUdt_QfmCMC-ZU_Ij-NYsLcZwiDsgU8nJd7fAG1cJShrYI4bJRVe9MZBIMYut7IV/exec";
+        // REPLACE WITH YOUR APPS SCRIPT WEB APP URL
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLDHxpgvq70kWCiuE0DLS8ttCIDJHumiYQ2KjRwE343mbFsouz3EWWOyl8JVtKs_fL/exec";
         let records = JSON.parse(localStorage.getItem('finDashRecords')) || [];
 
         function formatDisplayDate(dateString) {
             if(!dateString) return '';
+            // Agar ISO String format hai (eg. 2026-02-10T18:30:00.000Z)
+            if(dateString.includes('T')) {
+                dateString = dateString.split('T')[0];
+            }
             if(dateString.includes('/')) return dateString; 
             const parts = dateString.split('-');
             if(parts.length === 3) {
@@ -261,6 +265,9 @@
 
         function formatInputDate(dateStr) {
             if(!dateStr) return '';
+            if(dateStr.includes('T')) {
+                dateStr = dateStr.split('T')[0];
+            }
             if(dateStr.includes('-')) return dateStr;
             const parts = dateStr.split('/');
             if(parts.length === 3) {
@@ -271,6 +278,9 @@
 
         function parseToJsDate(dateStr) {
             if (!dateStr) return null;
+            if(dateStr.includes('T')) {
+                dateStr = dateStr.split('T')[0];
+            }
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
                 let d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
@@ -431,8 +441,8 @@
                 let tr = `<tr>
                     <td>${index + 1}</td>
                     <td>${formatDisplayDate(record.date)}</td>
-                    <td>${String(record.name).toUpperCase()}</td>
-                    <td>${String(record.bank).toUpperCase()}</td>
+                    <td>${String(record.name || '').toUpperCase()}</td>
+                    <td>${String(record.bank || '').toUpperCase()}</td>
                     <td>₹${record.loanAmount || 0}</td>
                     <td>₹${record.total}</td>
                     <td>₹${record.challan}</td>
@@ -440,7 +450,7 @@
                     <td>₹${record.commission || 0}</td> 
                     <td>₹${record.netReceived}</td>
                     <td>₹${record.pending}</td>
-                    <td><span class="badge ${badgeClass}">${String(record.status).toUpperCase()}</span></td>
+                    <td><span class="badge ${badgeClass}">${String(record.status || '').toUpperCase()}</span></td>
                     <td>
                         <button class="btn-edit" onclick="startEditEntry(${record.id})">Edit</button>
                         <button class="btn-delete" onclick="deleteEntry(${record.id})">Delete</button>
@@ -490,8 +500,8 @@
             const excelRows = dataset.map((r, index) => ({
                 "S.N.": index + 1,
                 "DATE": formatDisplayDate(r.date),
-                "APPLICANT NAME": String(r.name).toUpperCase(),
-                "BANK": String(r.bank).toUpperCase(),
+                "APPLICANT NAME": String(r.name || '').toUpperCase(),
+                "BANK": String(r.bank || '').toUpperCase(),
                 "LOAN AMOUNT (INR)": r.loanAmount || 0,
                 "TOTAL BASE (INR)": r.total,
                 "CHALLAN OUT (INR)": r.challan,
@@ -499,7 +509,7 @@
                 "COMMISSION (INR)": r.commission || 0,
                 "NET RECEIVED (INR)": r.netReceived,
                 "PENDING (INR)": r.pending,
-                "STATUS": String(r.status).toUpperCase()
+                "STATUS": String(r.status || '').toUpperCase()
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(excelRows);
@@ -519,9 +529,9 @@
 
             const headers = [["S.N.", "DATE", "APPLICANT", "BANK", "LOAN AMT", "TOTAL BASE", "CHALLAN OUT", "CHALLAN FEE", "COMM.", "NET RECV.", "PENDING", "STATUS"]];
             const rows = dataset.map((r, index) => [
-                index + 1, formatDisplayDate(r.date), String(r.name).toUpperCase(), String(r.bank).toUpperCase(),
+                index + 1, formatDisplayDate(r.date), String(r.name || '').toUpperCase(), String(r.bank || '').toUpperCase(),
                 `RS. ${r.loanAmount || 0}`, `RS. ${r.total}`, `RS. ${r.challan}`, `RS. ${r.fee}`, `RS. ${r.commission || 0}`,
-                `RS. ${r.netReceived}`, `RS. ${r.pending}`, String(r.status).toUpperCase()
+                `RS. ${r.netReceived}`, `RS. ${r.pending}`, String(r.status || '').toUpperCase()
             ]);
 
             doc.autoTable({
