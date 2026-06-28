@@ -3,36 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinDash - Cloud Ledger Terminal</title>
+  <title>FinDash Terminal - Bidirectional Sync Node</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   <style>
-    :root { --sidebar-width: 260px; }
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
-    .sidebar { width: var(--sidebar-width); }
-    .main-content { margin-left: var(--sidebar-width); }
-    input:focus, select:focus { outline: 2px solid #3b82f6; outline-offset: 1px; }
+    .sidebar { width: 260px; }
+    .main-content { margin-left: 260px; }
   </style>
 </head>
 <body class="text-slate-800">
 
   <aside class="sidebar fixed top-0 bottom-0 left-0 bg-slate-900 text-slate-100 flex flex-col z-30 shadow-xl">
     <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
-      <i class="fa-solid calves fa-chart-line text-emerald-400 text-xl"></i>
+      <i class="fa-solid fa-chart-line text-emerald-400 text-xl"></i>
       <span class="text-xl font-bold tracking-wider text-white">FinDash</span>
     </div>
     <nav class="flex-1 px-4 py-6 space-y-2">
-      <a href="#" class="flex items-center gap-3 px-4 py-3 text-emerald-400 bg-slate-800 rounded-lg font-medium transition">
-        <i class="fa-solid fa-table-list"></i> Core Ledger
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-emerald-400 bg-slate-800 rounded-lg font-medium interaction">
+        <i class="fa-solid fa-table-list"></i> Core Ledger System
       </a>
     </nav>
     <div class="p-4 border-t border-slate-800">
-      <div class="text-xs text-slate-500">Active Node Engine</div>
+      <div class="text-xs text-slate-500">Node Status</div>
       <div class="text-sm text-slate-300 flex items-center gap-2 mt-1">
-        <span class="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span> Cloud Integrated
+        <span class="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span> Cloud Link Latent
       </div>
     </div>
   </aside>
@@ -40,16 +38,14 @@
   <main class="main-content min-h-screen flex flex-col">
     <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
       <div class="flex items-center gap-4">
-        <h1 class="text-xl font-semibold text-slate-900">Financial Management Dashboard</h1>
+        <h1 class="text-xl font-semibold text-slate-900">Synchronized Ledger Node</h1>
         <div id="syncStatus" class="text-xs font-semibold px-2.5 py-1 rounded bg-amber-100 text-amber-800 flex items-center gap-1">
-          <i class="fa-solid fa-triangle-exclamation"></i> Sync Uninitialized
+          <i class="fa-solid fa-triangle-exclamation"></i> Initialization Required
         </div>
       </div>
-      <div class="flex items-center gap-3">
-        <button onclick="fetchFromCloud()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow-sm flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-down"></i> Sync Cloud
-        </button>
-      </div>
+      <button onclick="fetchFromCloud()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow-sm flex items-center gap-2">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Sync Cloud Database
+      </button>
     </header>
 
     <div class="p-8 space-y-8 flex-1 max-w-[1600px] w-full mx-auto">
@@ -89,10 +85,11 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden lg:col-span-1">
           <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
             <h2 id="formHeader" class="font-semibold text-slate-900 flex items-center gap-2">
-              <i class="fa-solid fa-square-plus text-blue-600"></i> New Transaction Entry
+              <i class="fa-solid fa-square-plus text-blue-600"></i> Create Transaction Entry
             </h2>
             <button id="clearEditBtn" onclick="resetFormState()" class="hidden text-xs font-medium text-rose-600 hover:underline">Cancel Edit</button>
           </div>
+          
           <form id="ledgerForm" onsubmit="handleFormSubmission(event)" class="p-6 space-y-4">
             <input type="hidden" id="recordId" value="">
             
@@ -102,15 +99,15 @@
                 <input type="date" id="date" required class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Client Entity Name</label>
-                <input type="text" id="name" required placeholder="E.g., ACME Corp" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Entity Name</label>
+                <input type="text" id="name" required placeholder="Name" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Origin Bank</label>
-                <input type="text" id="bank" required placeholder="E.g., Chase" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Bank</label>
+                <input type="text" id="bank" required placeholder="Bank" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Loan Capital</label>
@@ -131,25 +128,25 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Per Challan Fee</label>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Challan Fee</label>
                 <input type="number" step="0.01" id="fee" required value="0" oninput="computeFormMetrics()" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Sales Commission</label>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Commission</label>
                 <input type="number" step="0.01" id="commission" required value="0" oninput="computeFormMetrics()" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-slate-50">
               </div>
             </div>
 
-            <div class="border-t border-dashed border-slate-200 my-2 pt-2"></div>
+            <div class="border-t border-dashed border-slate-200 pt-2"></div>
 
             <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
               <div>
                 <label class="block text-xs font-bold text-blue-900 uppercase mb-0.5">Net Received</label>
-                <input type="number" id="netReceived" readonly value="0" class="w-full text-sm font-semibold bg-white border border-slate-200 text-slate-500 rounded px-2.5 py-1.5 cursor-not-allowed">
+                <input type="number" id="netReceived" readonly value="0.00" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded px-2.5 py-1.5 cursor-not-allowed">
               </div>
               <div>
                 <label class="block text-xs font-bold text-amber-900 uppercase mb-0.5">Pending Pool</label>
-                <input type="number" id="pending" readonly value="0" class="w-full text-sm font-semibold bg-white border border-slate-200 text-slate-500 rounded px-2.5 py-1.5 cursor-not-allowed">
+                <input type="number" id="pending" readonly value="0.00" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded px-2.5 py-1.5 cursor-not-allowed">
               </div>
             </div>
 
@@ -161,8 +158,8 @@
               </select>
             </div>
 
-            <button type="submit" id="submitBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg text-sm mt-2 transition shadow flex items-center justify-center gap-2">
-              <i class="fa-solid fa-floppy-disk"></i> Commit Data Record
+            <button type="submit" id="submitBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg text-sm transition shadow flex items-center justify-center gap-2">
+              <i class="fa-solid fa-floppy-disk"></i> Commit Record Data
             </button>
           </form>
         </div>
@@ -202,15 +199,14 @@
                   <th class="py-3.5 px-4 text-right">Gross</th>
                   <th class="py-3.5 px-4 text-right">Net Calc</th>
                   <th class="py-3.5 px-4 text-center">Status</th>
-                  <th class="py-3.5 px-4 text-center">Control</th>
+                  <th class="py-3.5 px-4 text-center">Control Actions</th>
                 </tr>
               </thead>
-              <tbody id="ledgerTableBody" class="divide-y divide-slate-100 text-sm">
-                </tbody>
+              <tbody id="ledgerTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
             </table>
             <div id="emptyState" class="hidden p-12 text-center text-slate-400">
               <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
-              <p class="text-sm font-medium">No matching ledger records active in memory context.</p>
+              <p class="text-sm font-medium">No system records matched target search conditions.</p>
             </div>
           </div>
         </div>
@@ -219,23 +215,19 @@
   </main>
 
   <script>
-    // DEFINE APPS SCRIPT WEB APP API TARGET URL HERE
-    const API_URL = "https://script.google.com/macros/s/AKfycbzZtx3R2As_3u2xoHYGgeEcHhtWqENp5qhUrCSD0o_2tDbCrlAZYTQs-NQidMHSI1RH/exec"; 
+    // CRITICAL PASTE: Insert the Web App URL copied after deploying your script as a new version here
+    const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; 
 
-    // Unified client data array state
     let globalRecords = [];
 
-    // --- IMMUNIZATION AND PARSING HELPERS (Anti Date-Swapping Engine) ---
+    // --- DATE CONVERSION SECURITY INTERPOLATION HELPERS ---
     
     function formatDisplayDate(dateString) {
       if (!dateString) return "";
       if (dateString.includes('T')) dateString = dateString.split('T')[0];
-      
-      if (dateString.includes('-')) { // Form: YYYY-MM-DD
+      if (dateString.includes('-')) {
         const parts = dateString.split('-');
-        if (parts[0].length === 4) {
-          return `${parts[2]}/${parts[1]}/${parts[0]}`; // UI standard format: DD/MM/YYYY
-        }
+        if (parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
       return dateString;
     }
@@ -243,27 +235,23 @@
     function formatInputDate(dateStr) {
       if (!dateStr) return "";
       if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
-      
-      if (dateStr.includes('/')) { // Form: DD/MM/YYYY
+      if (dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        if (parts[2].length === 4) {
-          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-        }
+        if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
       }
-      return dateStr; // Matches YYYY-MM-DD execution criteria
+      return dateStr;
     }
 
     function parseToJsDate(dateStr) {
       if (!dateStr) return null;
       if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
-      
       let year, month, day;
-      if (dateStr.includes('-')) { // YYYY-MM-DD
+      if (dateStr.includes('-')) {
         const parts = dateStr.split('-');
         year = parseInt(parts[0], 10);
         month = parseInt(parts[1], 10) - 1;
         day = parseInt(parts[2], 10);
-      } else if (dateStr.includes('/')) { // DD/MM/YYYY
+      } else if (dateStr.includes('/')) {
         const parts = dateStr.split('/');
         year = parseInt(parts[2], 10);
         month = parseInt(parts[1], 10) - 1;
@@ -274,7 +262,7 @@
       return new Date(year, month, day);
     }
 
-    // --- FORM COMPUTATION ENGINE ---
+    // --- FINANCIAL METRICS COMPUTATION ENGINE ---
     
     function computeFormMetrics() {
       const total = parseFloat(document.getElementById('total').value) || 0;
@@ -283,7 +271,6 @@
       const commission = parseFloat(document.getElementById('commission').value) || 0;
       const status = document.getElementById('status').value;
 
-      // Net Calculated = Total Base - Challan Out - Per Challan Fee - Sales Commission
       const netCalculated = total - challan - fee - commission;
 
       if (status === "Received") {
@@ -295,17 +282,15 @@
       }
     }
 
-    // --- SYNCHRONIZATION AND CACHING LOGIC ---
+    // --- SYSTEM SYNCHRONIZATION OVERHEADS ---
     
     window.addEventListener('DOMContentLoaded', () => {
-      // Load Cached Ledger instances initially
       const cached = localStorage.getItem('fin_ledger_data');
       if (cached) {
         globalRecords = JSON.parse(cached);
-        setSyncBadge(true, "Loaded from Local Storage Cache");
+        setSyncBadge(true, "Loaded from Offline Local Cache");
         applyFiltersAndRender();
       }
-      // Initialize Default Inputs to clear formatting anomalies
       resetFormState();
     });
 
@@ -316,13 +301,13 @@
         badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${message}`;
       } else {
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-100 text-amber-800 flex items-center gap-1";
-        badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Synchronization Active...`;
+        badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing API Mutation Request...`;
       }
     }
 
     function fetchFromCloud() {
-      if(API_URL.includes("...")) {
-        alert("Please set your valid Google Apps Script Deployment API_URL.");
+      if(API_URL.includes("YOUR_GOOGLE")) {
+        alert("Action Required: Please overwrite placeholder line 187 with your deployed Google Script URL.");
         return;
       }
       setSyncBadge(false);
@@ -333,40 +318,36 @@
           if (Array.isArray(data)) {
             globalRecords = data;
             localStorage.setItem('fin_ledger_data', JSON.stringify(globalRecords));
-            setSyncBadge(true, "Cloud Sync Verified");
+            setSyncBadge(true, "Cloud Database Match Verified");
             applyFiltersAndRender();
           } else {
-            throw new Error(data.error || "Malformed Payload Protocol");
+            throw new Error(data.error || "Malformed dataset error encountered.");
           }
         })
         .catch(err => {
           console.error(err);
-          setSyncBadge(true, "Sync Interrupted, Using Cache Data");
-          alert("Cloud Fetch execution error. Working from fallback cache.");
+          setSyncBadge(true, "Offline Engine Running");
         });
     }
 
-    // --- CORE DATA RENDERER AND FILTER ENGINE ---
+    // --- RENDER & DISPLAY COUPLING ENGINE ---
     
     function applyFiltersAndRender() {
-      const startVal = document.getElementById('filterStart').value; // YYYY-MM-DD
-      const endVal = document.getElementById('filterEnd').value;     // YYYY-MM-DD
-      
+      const startVal = document.getElementById('filterStart').value;
+      const endVal = document.getElementById('filterEnd').value;
       const startDate = startVal ? parseToJsDate(startVal) : null;
       const endDate = endVal ? parseToJsDate(endVal) : null;
-      if(endDate) endDate.setHours(23, 59, 59, 999); // Inclusion buffer
+      if(endDate) endDate.setHours(23, 59, 59, 999);
 
       let filtered = globalRecords.filter(rec => {
         if (!rec.date) return false;
         const recDate = parseToJsDate(rec.date);
         if (!recDate) return false;
-        
         if (startDate && recDate < startDate) return false;
         if (endDate && recDate > endDate) return false;
         return true;
       });
 
-      // Update KPI Statistics Metrics Cards
       let gross = 0, netCalc = 0, received = 0, pending = 0;
       
       filtered.forEach(r => {
@@ -378,20 +359,15 @@
 
         gross += parseFloat(r.loanAmount) || 0;
         netCalc += nc;
-        
-        if (r.status === "Received") {
-          received += nc;
-        } else {
-          pending += nc;
-        }
+        if (r.status === "Received") received += nc;
+        else pending += nc;
       });
 
-      document.getElementById('kpiGross').innerText = "$" + gross.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('kpiNetCalc').innerText = "$" + netCalc.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('kpiReceived').innerText = "$" + received.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('kpiPending').innerText = "$" + pending.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('kpiGross').innerText = "$" + gross.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiNetCalc').innerText = "$" + netCalc.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiReceived').innerText = "$" + received.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiPending').innerText = "$" + pending.toLocaleString(undefined, {minimumFractionDigits: 2});
 
-      // Render Table Data Layout
       const tbody = document.getElementById('ledgerTableBody');
       const emptyState = document.getElementById('emptyState');
       tbody.innerHTML = "";
@@ -413,8 +389,8 @@
         tr.className = "hover:bg-slate-50 border-b border-slate-100 text-slate-700 transition";
         tr.innerHTML = `
           <td class="py-3 px-4 font-medium">${formatDisplayDate(rec.date)}</td>
-          <td class="py-3 px-4 font-semibold text-slate-900">${rec.name.toUpperCase()}</td>
-          <td class="py-3 px-4 text-slate-500">${rec.bank.toUpperCase()}</td>
+          <td class="py-3 px-4 font-semibold text-slate-900">${String(rec.name).toUpperCase()}</td>
+          <td class="py-3 px-4 text-slate-500">${String(rec.bank).toUpperCase()}</td>
           <td class="py-3 px-4 text-right font-mono">$${(parseFloat(rec.loanAmount)||0).toFixed(2)}</td>
           <td class="py-3 px-4 text-right font-mono">$${t.toFixed(2)}</td>
           <td class="py-3 px-4 text-right font-mono font-semibold text-slate-900">$${nc.toFixed(2)}</td>
@@ -424,9 +400,9 @@
             </span>
           </td>
           <td class="py-3 px-4 text-center">
-            <div class="flex items-center justify-center gap-2">
-              <button onclick="initiateEdit('${rec.id}')" class="text-blue-600 hover:text-blue-800 p-1 transition" title="Modify Record"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button onclick="commitDeletion('${rec.id}')" class="text-rose-600 hover:text-rose-800 p-1 transition" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
+            <div class="flex items-center justify-center gap-3">
+              <button onclick="initiateEdit('${rec.id}')" class="text-blue-600 hover:text-blue-800 transition" title="Modify Entry"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="commitDeletion('${rec.id}')" class="text-rose-600 hover:text-rose-800 transition" title="Remove Entry"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         `;
@@ -440,18 +416,18 @@
       applyFiltersAndRender();
     }
 
-    // --- WRITE ACTION PIPELINES ---
+    // --- MUTATION HANDLING PIPELINES ---
     
     function handleFormSubmission(e) {
       e.preventDefault();
       
       const id = document.getElementById('recordId').value;
-      const rawDate = document.getElementById('date').value; // HTML5 gives YYYY-MM-DD
+      const rawDate = document.getElementById('date').value;
       const action = id ? "UPDATE" : "INSERT";
       
       const record = {
         id: id || undefined,
-        date: formatInputDate(rawDate), // Force YYYY-MM-DD prior to pipeline transmission
+        date: formatInputDate(rawDate),
         name: document.getElementById('name').value,
         bank: document.getElementById('bank').value,
         loanAmount: parseFloat(document.getElementById('loanAmount').value) || 0,
@@ -464,41 +440,37 @@
         status: document.getElementById('status').value
       };
 
-      // Optimistic client-side UI mutation mapping
+      // Optimistic Client Render Update Execution
       if (action === "INSERT") {
-        const tempId = "TEMP_" + new Date().getTime();
-        const newRecord = { ...record, id: tempId };
-        globalRecords.push(newRecord);
+        record.id = "TEMP_" + new Date().getTime();
+        globalRecords.push(record);
       } else {
-        const targetIdx = globalRecords.findIndex(r => r.id === id);
-        if (targetIdx !== -1) globalRecords[targetIdx] = record;
+        const idx = globalRecords.findIndex(r => String(r.id) === String(id));
+        if (idx !== -1) globalRecords[idx] = record;
       }
       
       localStorage.setItem('fin_ledger_data', JSON.stringify(globalRecords));
       applyFiltersAndRender();
       resetFormState();
       
-      // Post transaction request to script engine backend
-      if(!API_URL.includes("...")) {
-        setSyncBadge(false);
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: action, record: record })
-        })
-        .then(res => res.json())
-        .then(resData => {
-          if(resData.success) {
-            fetchFromCloud(); // Hot fetch ensures full reconciliation
-          } else {
-            alert("Cloud mutation rejected: " + resData.error);
-          }
-        })
-        .catch(err => console.error("Pipeline failure: ", err));
-      }
+      if(API_URL.includes("YOUR_GOOGLE")) return;
+      
+      setSyncBadge(false);
+      fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors", // Bypasses redirection blockages across deployment origins
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: action, record: record })
+      })
+      .then(() => {
+        // Since no-cors doesn't allow reading body contents directly, run fetch to confirm sheet synchronization state
+        setTimeout(fetchFromCloud, 600);
+      })
+      .catch(err => console.error("Pipeline Sync Exception: ", err));
     }
 
     function initiateEdit(id) {
-      const record = globalRecords.find(r => r.id === id);
+      const record = globalRecords.find(r => String(r.id) === String(id));
       if(!record) return;
 
       document.getElementById('recordId').value = record.id;
@@ -515,117 +487,107 @@
       document.getElementById('status').value = record.status;
 
       document.getElementById('formHeader').innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-500"></i> Modify Ledger Entry`;
-      document.getElementById('submitBtn').className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg text-sm mt-2 transition shadow flex items-center justify-center gap-2";
-      document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-circle-check"></i> Save Modifications`;
+      document.getElementById('submitBtn').className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg text-sm transition shadow flex items-center justify-center gap-2";
+      document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-circle-check"></i> Save Data Modification`;
       document.getElementById('clearEditBtn').classList.remove('hidden');
     }
 
     function commitDeletion(id) {
-      if(!confirm("Are you sure you want to delete this operational entry?")) return;
+      if(!confirm("Are you sure you want to completely drop this ledger entry record?")) return;
       
-      globalRecords = globalRecords.filter(r => r.id !== id);
+      globalRecords = globalRecords.filter(r => String(r.id) !== String(id));
       localStorage.setItem('fin_ledger_data', JSON.stringify(globalRecords));
       applyFiltersAndRender();
 
-      if(!API_URL.includes("...")) {
-        setSyncBadge(false);
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "DELETE", record: { id: id } })
-        })
-        .then(res => res.json())
-        .then(resData => {
-          if(resData.success) {
-            fetchFromCloud();
-          } else {
-            alert("Deletion failed on cloud backend.");
-          }
-        })
-        .catch(err => console.error(err));
-      }
+      if(API_URL.includes("https://script.google.com/macros/s/AKfycbxhVGhiRse2sQjPXXHxlR6BQgSsrPRVyshGbJc2xbUqLzCbUymzF9a9Q-C8Yyzlyh4I/exec")) return;
+      
+      setSyncBadge(false);
+      fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "DELETE", record: { id: id } })
+      })
+      .then(() => {
+        setTimeout(fetchFromCloud, 600);
+      })
+      .catch(err => console.error(err));
     }
 
     function resetFormState() {
       document.getElementById('ledgerForm').reset();
       document.getElementById('recordId').value = "";
       
-      // Default to today's local date explicitly matching HTML5 input spec
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
       document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
       
-      document.getElementById('formHeader').innerHTML = `<i class="fa-solid fa-square-plus text-blue-600"></i> New Transaction Entry`;
-      document.getElementById('submitBtn').className = "w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg text-sm mt-2 transition shadow flex items-center justify-center gap-2";
-      document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Commit Data Record`;
+      document.getElementById('formHeader').innerHTML = `<i class="fa-solid fa-square-plus text-blue-600"></i> Create Transaction Entry`;
+      document.getElementById('submitBtn').className = "w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg text-sm transition shadow flex items-center justify-center gap-2";
+      document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Commit Record Data`;
       document.getElementById('clearEditBtn').classList.add('hidden');
     }
 
-    // --- DATA EXPORT MANAGEMENT ---
+    // --- DATA DOWNSTREAM ENGINE EXPORTS ---
     
     function exportToExcel() {
-      if(globalRecords.length === 0) return alert("No active workspace data records found.");
-      
-      const preparedRows = globalRecords.map(r => {
+      if(globalRecords.length === 0) return alert("Operation rejected: Local ledger workspace data is currently empty.");
+      const dataRows = globalRecords.map(r => {
         const t = parseFloat(r.total) || 0;
         const ch = parseFloat(r.challan) || 0;
         const fe = parseFloat(r.fee) || 0;
         const co = parseFloat(r.commission) || 0;
         return {
           "DATE": formatDisplayDate(r.date),
-          "CLIENT NAME": r.name.toUpperCase(),
-          "BANK": r.bank.toUpperCase(),
+          "CLIENT NAME": String(r.name).toUpperCase(),
+          "BANK": String(r.bank).toUpperCase(),
           "LOAN AMOUNT": parseFloat(r.loanAmount) || 0,
           "TOTAL GROSS": t,
           "NET CALCULATED": t - ch - fe - co,
-          "STATUS": r.status.toUpperCase()
+          "STATUS": String(r.status).toUpperCase()
         };
       });
-
-      const worksheet = XLSX.utils.json_to_sheet(preparedRows);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
-      XLSX.writeFile(workbook, `FinDash_Ledger_Export_${new Date().getTime()}.xlsx`);
+      const ws = XLSX.utils.json_to_sheet(dataRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Ledger Workspace");
+      XLSX.writeFile(wb, `FinDash_MasterExport_${new Date().getTime()}.xlsx`);
     }
 
     function exportToPDF() {
-      if(globalRecords.length === 0) return alert("No active workspace data records found.");
-      
+      if(globalRecords.length === 0) return alert("Operation rejected: Local ledger workspace data is currently empty.");
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape' });
       
       doc.setFontSize(14);
-      doc.text("FINANCIAL MANAGEMENT TERMINAL - DATA RECORD EXPORT", 14, 15);
-      doc.setFontSize(9);
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
-
-      const tableRows = globalRecords.map(r => {
+      doc.text("FINANCIAL MANAGEMENT TERMINAL - MASTER ARCHIVE", 14, 15);
+      
+      const rows = globalRecords.map(r => {
         const t = parseFloat(r.total) || 0;
         const ch = parseFloat(r.challan) || 0;
         const fe = parseFloat(r.fee) || 0;
         const co = parseFloat(r.commission) || 0;
         return [
           formatDisplayDate(r.date),
-          r.name.toUpperCase(),
-          r.bank.toUpperCase(),
+          String(r.name).toUpperCase(),
+          String(r.bank).toUpperCase(),
           "$" + (parseFloat(r.loanAmount) || 0).toFixed(2),
           "$" + t.toFixed(2),
           "$" + (t - ch - fe - co).toFixed(2),
-          r.status.toUpperCase()
+          String(r.status).toUpperCase()
         ];
       });
 
       doc.autoTable({
         head: [['DATE', 'CLIENT NAME', 'BANK', 'LOAN AMOUNT', 'TOTAL GROSS', 'NET CALCULATED', 'STATUS']],
-        body: tableRows,
-        startY: 28,
+        body: rows,
+        startY: 25,
         theme: 'grid',
-        styles: { fontSize: 8, font: 'courier' },
         headStyles: { fillColor: [15, 23, 42] }
       });
 
-      doc.save(`FinDash_Ledger_Export_${new Date().getTime()}.pdf`);
+      doc.save(`FinDash_PDF_Report_${new Date().getTime()}.pdf`);
     }
   </script>
 </body>
