@@ -54,28 +54,28 @@
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Gross Volume</p>
-            <h3 id="kpiGross" class="text-2xl font-bold text-slate-900 mt-1">$0.00</h3>
+            <h3 id="kpiGross" class="text-2xl font-bold text-slate-900 mt-1">₹0.00</h3>
           </div>
           <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-wallet text-xl"></i></div>
         </div>
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Net Calculated</p>
-            <h3 id="kpiNetCalc" class="text-2xl font-bold text-slate-900 mt-1">$0.00</h3>
+            <h3 id="kpiNetCalc" class="text-2xl font-bold text-slate-900 mt-1">₹0.00</h3>
           </div>
           <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-scale-balanced text-xl"></i></div>
         </div>
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Net Received</p>
-            <h3 id="kpiReceived" class="text-2xl font-bold text-slate-900 mt-1">$0.00</h3>
+            <h3 id="kpiReceived" class="text-2xl font-bold text-slate-900 mt-1">₹0.00</h3>
           </div>
           <div class="p-3 bg-teal-50 text-teal-600 rounded-lg"><i class="fa-solid fa-circle-check text-xl"></i></div>
         </div>
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Pending Pool</p>
-            <h3 id="kpiPending" class="text-2xl font-bold text-rose-600 mt-1">$0.00</h3>
+            <h3 id="kpiPending" class="text-2xl font-bold text-rose-600 mt-1">₹0.00</h3>
           </div>
           <div class="p-3 bg-rose-50 text-rose-600 rounded-lg"><i class="fa-solid fa-clock text-xl"></i></div>
         </div>
@@ -227,7 +227,7 @@
       if (dateString.includes('T')) dateString = dateString.split('T')[0];
       if (dateString.includes('-')) {
         const parts = dateString.split('-');
-        if (parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        if (parts[0].length === 4) return `₹{parts[2]}/₹{parts[1]}/₹{parts[0]}`;
       }
       return dateString;
     }
@@ -237,7 +237,7 @@
       if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
       if (dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        if (parts[2].length === 4) return `₹{parts[2]}-₹{parts[1].padStart(2, '0')}-₹{parts[0].padStart(2, '0')}`;
       }
       return dateStr;
     }
@@ -298,7 +298,7 @@
       const badge = document.getElementById('syncStatus');
       if (isSynced) {
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 flex items-center gap-1";
-        badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${message}`;
+        badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ₹{message}`;
       } else {
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-100 text-amber-800 flex items-center gap-1";
         badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing API Mutation Request...`;
@@ -363,10 +363,10 @@
         else pending += nc;
       });
 
-      document.getElementById('kpiGross').innerText = "$" + gross.toLocaleString(undefined, {minimumFractionDigits: 2});
-      document.getElementById('kpiNetCalc').innerText = "$" + netCalc.toLocaleString(undefined, {minimumFractionDigits: 2});
-      document.getElementById('kpiReceived').innerText = "$" + received.toLocaleString(undefined, {minimumFractionDigits: 2});
-      document.getElementById('kpiPending').innerText = "$" + pending.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiGross').innerText = "₹" + gross.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiNetCalc').innerText = "₹" + netCalc.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiReceived').innerText = "₹" + received.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('kpiPending').innerText = "₹" + pending.toLocaleString(undefined, {minimumFractionDigits: 2});
 
       const tbody = document.getElementById('ledgerTableBody');
       const emptyState = document.getElementById('emptyState');
@@ -388,21 +388,21 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 border-b border-slate-100 text-slate-700 transition";
         tr.innerHTML = `
-          <td class="py-3 px-4 font-medium">${formatDisplayDate(rec.date)}</td>
-          <td class="py-3 px-4 font-semibold text-slate-900">${String(rec.name).toUpperCase()}</td>
-          <td class="py-3 px-4 text-slate-500">${String(rec.bank).toUpperCase()}</td>
-          <td class="py-3 px-4 text-right font-mono">$${(parseFloat(rec.loanAmount)||0).toFixed(2)}</td>
-          <td class="py-3 px-4 text-right font-mono">$${t.toFixed(2)}</td>
-          <td class="py-3 px-4 text-right font-mono font-semibold text-slate-900">$${nc.toFixed(2)}</td>
+          <td class="py-3 px-4 font-medium">₹{formatDisplayDate(rec.date)}</td>
+          <td class="py-3 px-4 font-semibold text-slate-900">₹{String(rec.name).toUpperCase()}</td>
+          <td class="py-3 px-4 text-slate-500">₹{String(rec.bank).toUpperCase()}</td>
+          <td class="py-3 px-4 text-right font-mono">₹₹{(parseFloat(rec.loanAmount)||0).toFixed(2)}</td>
+          <td class="py-3 px-4 text-right font-mono">₹₹{t.toFixed(2)}</td>
+          <td class="py-3 px-4 text-right font-mono font-semibold text-slate-900">₹₹{nc.toFixed(2)}</td>
           <td class="py-3 px-4 text-center">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${rec.status === 'Received' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-              ${rec.status}
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ₹{rec.status === 'Received' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ₹{rec.status}
             </span>
           </td>
           <td class="py-3 px-4 text-center">
             <div class="flex items-center justify-center gap-3">
-              <button onclick="initiateEdit('${rec.id}')" class="text-blue-600 hover:text-blue-800 transition" title="Modify Entry"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button onclick="commitDeletion('${rec.id}')" class="text-rose-600 hover:text-rose-800 transition" title="Remove Entry"><i class="fa-solid fa-trash"></i></button>
+              <button onclick="initiateEdit('₹{rec.id}')" class="text-blue-600 hover:text-blue-800 transition" title="Modify Entry"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="commitDeletion('₹{rec.id}')" class="text-rose-600 hover:text-rose-800 transition" title="Remove Entry"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         `;
@@ -522,7 +522,7 @@
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
-      document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('date').value = `₹{yyyy}-₹{mm}-₹{dd}`;
       
       document.getElementById('formHeader').innerHTML = `<i class="fa-solid fa-square-plus text-blue-600"></i> Create Transaction Entry`;
       document.getElementById('submitBtn').className = "w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg text-sm transition shadow flex items-center justify-center gap-2";
@@ -552,7 +552,7 @@
       const ws = XLSX.utils.json_to_sheet(dataRows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Ledger Workspace");
-      XLSX.writeFile(wb, `FinDash_MasterExport_${new Date().getTime()}.xlsx`);
+      XLSX.writeFile(wb, `FinDash_MasterExport_₹{new Date().getTime()}.xlsx`);
     }
 
     function exportToPDF() {
@@ -572,9 +572,9 @@
           formatDisplayDate(r.date),
           String(r.name).toUpperCase(),
           String(r.bank).toUpperCase(),
-          "$" + (parseFloat(r.loanAmount) || 0).toFixed(2),
-          "$" + t.toFixed(2),
-          "$" + (t - ch - fe - co).toFixed(2),
+          "₹" + (parseFloat(r.loanAmount) || 0).toFixed(2),
+          "₹" + t.toFixed(2),
+          "₹" + (t - ch - fe - co).toFixed(2),
           String(r.status).toUpperCase()
         ];
       });
@@ -587,7 +587,7 @@
         headStyles: { fillColor: [15, 23, 42] }
       });
 
-      doc.save(`FinDash_PDF_Report_${new Date().getTime()}.pdf`);
+      doc.save(`FinDash_PDF_Report_₹{new Date().getTime()}.pdf`);
     }
   </script>
 </body>
