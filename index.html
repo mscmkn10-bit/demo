@@ -245,9 +245,10 @@
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTNtRrGvjS_2Lh_Jf55cUvdrcLULiekRGKCGSFmgtzg5k4hMZToaszLbhM8YBCH0Xt/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvjT6PpgzIRndXuBilpks12Y7SQLCedFrYdoqrgmtXTfpTSrgC7jWAQYSK1g2xzaA/exec";
         let records = JSON.parse(localStorage.getItem('finDashRecords')) || [];
 
+        // Hamesha explicit indices se DD/MM/YYYY return karega bina swap kiye
         function formatDisplayDate(dateString) {
             if(!dateString) return '';
             if(dateString.includes('T')) {
@@ -259,23 +260,28 @@
                     return `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
             }
-            return dateString; // Agar pehle se hi DD/MM/YYYY hai
+            return dateString; 
         }
 
+        // HTML Date input rules (YYYY-MM-DD) handle karne ke liye
         function formatInputDate(dateStr) {
             if(!dateStr) return '';
             if(dateStr.includes('T')) {
                 dateStr = dateStr.split('T')[0];
             }
-            if(dateStr.includes('-')) return dateStr;
+            if(dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if(parts[0].length === 4) return dateStr; // Valid YYYY-MM-DD
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // DD-MM-YYYY to YYYY-MM-DD
+            }
             if(dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                return `${parts[2]}-${parts[1]}-${parts[0]}`; // HTML input rules YYYY-MM-DD require karte hain
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // DD/MM/YYYY to YYYY-MM-DD
             }
             return dateStr;
         }
 
-        // FIXED: DD/MM/YYYY ko bina browser ambiguity ke secure aur index specific tarike se parse karne ke liye custom logic
+        // Standardized explicit parser taaki local browser formats date-month swap na kar sakein
         function parseToJsDate(dateStr) {
             if (!dateStr) return null;
             if(dateStr.includes('T')) {
@@ -283,7 +289,6 @@
             }
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                // parts[0]=DD, parts[1]=MM, parts[2]=YYYY. Month 0-indexed hota hai isliye -1
                 let d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
                 d.setHours(0,0,0,0);
                 return d;
@@ -294,11 +299,13 @@
                     let d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
                     d.setHours(0,0,0,0);
                     return d;
+                } else { // DD-MM-YYYY
+                    let d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+                    d.setHours(0,0,0,0);
+                    return d;
                 }
             }
-            let d = new Date(dateStr);
-            d.setHours(0,0,0,0);
-            return d;
+            return null;
         }
 
         function calculateNet() {
@@ -314,7 +321,7 @@
             e.preventDefault(); 
 
             let editId = document.getElementById('editRecordId').value;
-            let date = document.getElementById('date').value;
+            let date = document.getElementById('date').value; // HTML input gives YYYY-MM-DD
             let name = document.getElementById('name').value;
             let bank = document.getElementById('bank').value;
             let loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
@@ -330,7 +337,7 @@
 
             let finalRecordId = editId ? parseInt(editId) : Date.now();
             let syncAction = editId ? "UPDATE" : "INSERT";
-            let formattedDisplayDateVal = formatDisplayDate(date);
+            let formattedDisplayDateVal = formatDisplayDate(date); // Convert to DD/MM/YYYY
 
             let currentRecord = {
                 id: finalRecordId,
