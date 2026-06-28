@@ -15,16 +15,16 @@
         body { display: flex; background-color: #f4f6f9; color: #333; min-height: 100vh; }
         
         /* Sidebar Styling */
-        .sidebar { width: 250px; background-color: #1e293b; color: #fff; height: 100vh; padding-top: 20px; position: fixed; left: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
+        .sidebar { width: 250px; background-color: #1e293b; color: #fff; height: 100vh; padding-top: 20px; position: fixed; left: 0; top: 0; z-index: 100; }
         .sidebar h4 { text-align: center; font-size: 24px; font-weight: bold; padding-bottom: 20px; border-bottom: 1px solid #334155; margin-bottom: 20px; }
         .sidebar a { display: block; padding: 15px 20px; color: #cbd5e1; text-decoration: none; font-size: 16px; transition: 0.3s; }
         .sidebar a:hover { background-color: #334155; color: #fff; }
 
         /* Main Content Styling */
-        .main-content { margin-left: 250px; padding: 30px; width: calc(100% - 250px); transition: all 0.3s ease; }
+        .main-content { margin-left: 250px; padding: 30px; width: calc(100% - 250px); }
         
         /* Header Styling */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 25px; gap: 15px; flex-wrap: wrap; }
         .header-title h3 { color: #0f172a; margin-bottom: 5px; }
         .header-title p { color: #64748b; font-size: 14px; }
         
@@ -38,16 +38,11 @@
         .btn-pdf { background-color: #ec4899; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-pdf:hover { background-color: #db2777; }
 
-        /* Mobile Hamburger Toggle Header */
-        .mobile-nav-header { display: none; background-color: #1e293b; color: white; padding: 15px; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 101; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .mobile-nav-header h4 { font-size: 20px; font-weight: bold; }
-        .menu-toggle { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-
         /* Dashboard Cards */
         .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid #3b82f6; }
-        .card h6 { color: #64748b; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
-        .card h3 { color: #0f172a; font-size: 22px; word-break: break-all; }
+        .card h6 { color: #64748b; font-size: 14px; text-transform: uppercase; margin-bottom: 10px; }
+        .card h3 { color: #0f172a; font-size: 24px; word-break: break-all; }
 
         /* Form Section */
         .section-container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px; }
@@ -56,24 +51,24 @@
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 8px; }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; width: 100%; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; }
         .form-group input:focus, .form-group select:focus { border-color: #3b82f6; }
         .form-group input[readonly] { background-color: #f1f5f9; cursor: not-allowed; }
 
-        .btn-group { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
-        .btn-commit { background-color: #10b981; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; width: auto; }
+        .btn-group { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-commit { background-color: #10b981; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-commit:hover { background-color: #059669; }
-        .btn-cancel { background-color: #ef4444; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; width: auto; }
+        .btn-cancel { background-color: #ef4444; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-cancel:hover { background-color: #dc2626; }
 
-        /* Table Filter Controls Layout */
-        .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        /* Dynamic Filtering Block Styles */
+        .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .filter-group { display: flex; flex-direction: column; }
         .filter-group label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 5px; }
         .filter-group input, .filter-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
         /* Table Section */
-        .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         table th, table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
         table th { background-color: #f8fafc; color: #475569; font-weight: 600; }
@@ -82,55 +77,27 @@
         .badge-pending { background-color: #fef3c7; color: #d97706; }
         .badge-received { background-color: #d1fae5; color: #059669; }
         .btn-edit { background-color: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; font-weight: bold; }
-        .btn-edit:hover { background-color: #d97706; }
-        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        
-        /* Backdrop overlay for mobile menu view */
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 99; }
+        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-        /* Responsive Breakpoints */
         @media (max-width: 1024px) {
             .cards { grid-template-columns: repeat(2, 1fr); }
             .form-grid { grid-template-columns: repeat(2, 1fr); }
             .filter-grid { grid-template-columns: repeat(2, 1fr); }
         }
-
         @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .mobile-nav-header { display: flex; }
-            .sidebar { transform: translateX(-100%); height: calc(100vh - 54px); top: 54px; width: 240px; }
-            .sidebar.active { transform: translateX(0); }
-            .sidebar-overlay.active { display: block; }
-            .main-content { margin-left: 0; width: 100%; padding: 80px 15px 30px 15px; }
-            .cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .form-grid { grid-template-columns: 1fr; gap: 15px; }
-            .filter-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; align-items: flex-start; }
-            .header-actions { width: 100%; }
-            .header-actions button { flex: 1 1 calc(50% - 10px); min-width: 120px; text-align: center; justify-content: center; }
-            .btn-group button { width: 100%; }
-        }
-
-        @media (max-width: 480px) {
-            .cards { grid-template-columns: 1fr; }
-            .header-actions button { flex: 1 1 100%; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; padding: 15px; }
+            .form-grid, .filter-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="mobile-nav-header">
+    <div class="sidebar">
         <h4>FinDash</h4>
-        <button class="menu-toggle" onclick="toggleMobileMenu()">☰</button>
-    </div>
-
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
-
-    <div class="sidebar" id="sidebarMenu">
-        <h4>FinDash</h4>
-        <a href="#" onclick="closeMobileMenu()">Overview Dashboard</a>
-        <a href="#form-section" onclick="closeMobileMenu()">Transaction Form</a>
-        <a href="#table-section" onclick="closeMobileMenu()">Database Records</a>
+        <a href="#">Overview Dashboard</a>
+        <a href="#form-section">Transaction Form</a>
+        <a href="#table-section">Database Records</a>
     </div>
 
     <div class="main-content">
@@ -171,7 +138,6 @@
             <h5 id="formTitle">Create Entry</h5>
             <form id="recordForm">
                 <input type="hidden" id="editRecordId" value="">
-                
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Execution Date</label>
@@ -247,7 +213,7 @@
                     </select>
                 </div>
                 <div class="filter-group" style="justify-content: flex-end;">
-                    <button class="btn-delete" style="background-color: #64748b; padding: 8px; font-weight: bold;" onclick="clearDateFilters()">Reset Filters</button>
+                    <button class="btn-delete" style="background-color: #64748b; padding: 8px;" onclick="clearDateFilters()">Reset Filters</button>
                 </div>
             </div>
 
@@ -279,17 +245,9 @@
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzj-FZ3rAEGg-RzJm5-Y5c7RfdpGLaOeR1m2fcfDFlV5ZkPgDehFA9G85G4dXjUIWDV/exec";
+        // REPLACE WITH YOUR RE-DEPLOYED WEB APP URL
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzTUdt_QfmCMC-ZU_Ij-NYsLcZwiDsgU8nJd7fAG1cJShrYI4bJRVe9MZBIMYut7IV/exec";
         let records = JSON.parse(localStorage.getItem('finDashRecords')) || [];
-
-        function toggleMobileMenu() {
-            document.getElementById('sidebarMenu').classList.toggle('active');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
-        }
-        function closeMobileMenu() {
-            document.getElementById('sidebarMenu').classList.remove('active');
-            document.getElementById('sidebarOverlay').classList.remove('active');
-        }
 
         function formatDisplayDate(dateString) {
             if(!dateString) return '';
@@ -311,12 +269,10 @@
             return dateStr;
         }
 
-        // Safe converter aligning saved DD/MM/YYYY records cleanly to timestamp formats
         function parseToJsDate(dateStr) {
             if (!dateStr) return null;
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                // parts[2]=Year, parts[1]=Month (0-indexed), parts[0]=Day
                 let d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
                 d.setHours(0,0,0,0);
                 return d;
@@ -373,18 +329,15 @@
 
             localStorage.setItem('finDashRecords', JSON.stringify(records));
 
-            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbx3Ep8wLp4Z2G9ugBnVVjRXIf4oraBSLTOsg0SVp9jdITWhCIC_MgCixOPZIRZfldif/exec") {
+            if (APPS_SCRIPT_URL !== "") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        action: syncAction,
-                        record: currentRecord
-                    })
+                    body: JSON.stringify({ action: syncAction, record: currentRecord })
                 })
-                .then(() => console.log("Cloud sync successful"))
-                .catch(err => console.error("Cloud push failed:", err));
+                .then(() => console.log("Cloud synced"))
+                .catch(err => console.error(err));
             }
 
             resetFormState();
@@ -416,31 +369,21 @@
             document.getElementById('status').value = record.status;
             
             calculateNet();
-
             document.getElementById('formTitle').innerText = "Modify Existing Entry";
             document.getElementById('submitBtn').innerText = "Update Entry";
             document.getElementById('submitBtn').style.backgroundColor = "#f59e0b";
-            
-            document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Core logic evaluating precise range comparisons for data filters
         function getFilteredData() {
             let startVal = document.getElementById('filterStartDate').value;
             let endVal = document.getElementById('filterEndDate').value;
             let statusFilter = document.getElementById('filterStatus').value;
 
-            let startDate = null;
-            let endDate = null;
-
-            if (startVal) {
-                startDate = new Date(startVal);
-                startDate.setHours(0,0,0,0);
-            }
-            if (endVal) {
-                endDate = new Date(endVal);
-                endDate.setHours(23,59,59,999);
-            }
+            let startDate = startVal ? new Date(startVal) : null;
+            let endDate = endVal ? new Date(endVal) : null;
+            
+            if(startDate) startDate.setHours(0,0,0,0);
+            if(endDate) endDate.setHours(23,59,59,999);
 
             return records.filter(r => {
                 if (statusFilter !== "All" && r.status !== statusFilter) return false;
@@ -485,12 +428,11 @@
             
             dataset.forEach((record, index) => {
                 let badgeClass = record.status === 'Received' ? 'badge-received' : 'badge-pending';
-                
                 let tr = `<tr>
                     <td>${index + 1}</td>
                     <td>${formatDisplayDate(record.date)}</td>
-                    <td>${record.name.toUpperCase()}</td>
-                    <td>${record.bank.toUpperCase()}</td>
+                    <td>${String(record.name).toUpperCase()}</td>
+                    <td>${String(record.bank).toUpperCase()}</td>
                     <td>₹${record.loanAmount || 0}</td>
                     <td>₹${record.total}</td>
                     <td>₹${record.challan}</td>
@@ -498,7 +440,7 @@
                     <td>₹${record.commission || 0}</td> 
                     <td>₹${record.netReceived}</td>
                     <td>₹${record.pending}</td>
-                    <td><span class="badge ${badgeClass}">${record.status.toUpperCase()}</span></td>
+                    <td><span class="badge ${badgeClass}">${String(record.status).toUpperCase()}</span></td>
                     <td>
                         <button class="btn-edit" onclick="startEditEntry(${record.id})">Edit</button>
                         <button class="btn-delete" onclick="deleteEntry(${record.id})">Delete</button>
@@ -509,60 +451,42 @@
         }
 
         function deleteEntry(id) {
-            if(!confirm("Are you sure you want to remove this record?")) return;
-            
+            if(!confirm("Delete record?")) return;
             records = records.filter(r => r.id !== id);
             localStorage.setItem('finDashRecords', JSON.stringify(records)); 
-            
-            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+            if (APPS_SCRIPT_URL !== "") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ action: "DELETE", record: { id: id } })
-                })
-                .then(() => console.log("Deleted from cloud successfully"))
-                .catch(err => console.error("Cloud delete failed:", err));
+                });
             }
-
             filterAndRender();
         }
 
         function fetchFromCloud() {
-            if (APPS_SCRIPT_URL === "" || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
-                alert("Please add your deployed Apps Script Web App URL.");
-                return;
-            }
+            if (!APPS_SCRIPT_URL) return alert("URL Missing.");
             const fetchBtn = document.querySelector('.btn-fetch');
             fetchBtn.innerText = "Fetching...";
             
             fetch(APPS_SCRIPT_URL)
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(cloudRecords => {
-                    if(Array.isArray(cloudRecords) && cloudRecords.length > 0) {
+                    if(Array.isArray(cloudRecords)) {
                         records = cloudRecords;
                         localStorage.setItem('finDashRecords', JSON.stringify(records));
                         filterAndRender();
                         alert("Records pulled down successfully!");
-                    } else {
-                        alert("Connected, but no entries found on the sheet backend ledger.");
                     }
                 })
-                .catch(err => {
-                    console.error(err);
-                    alert("Error connection execution failed.");
-                })
-                .finally(() => {
-                    fetchBtn.innerText = "Fetch Cloud Records";
-                });
+                .catch(err => alert("Sync execution failed: " + err))
+                .finally(() => fetchBtn.innerText = "Fetch Cloud Records");
         }
 
         function downloadExcel() {
             let dataset = getFilteredData();
-            if (dataset.length === 0) {
-                alert("No data available to download within selected filter bounds.");
-                return;
-            }
+            if (dataset.length === 0) return alert("No data available.");
             const excelRows = dataset.map((r, index) => ({
                 "S.N.": index + 1,
                 "DATE": formatDisplayDate(r.date),
@@ -580,51 +504,31 @@
 
             const worksheet = XLSX.utils.json_to_sheet(excelRows);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "LEDGER RECORDS");
-            worksheet['!cols'] = [{wch:6}, {wch:12}, {wch:22}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:12}];
-            XLSX.writeFile(workbook, `FINANCIAL_LEDGER_DATA_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.utils.book_append_sheet(workbook, worksheet, "LEDGER");
+            XLSX.writeFile(workbook, `LEDGER_DATA_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
         function downloadPDF() {
             let dataset = getFilteredData();
-            if (dataset.length === 0) {
-                alert("No data available to download within selected filter bounds.");
-                return;
-            }
+            if (dataset.length === 0) return alert("No data available.");
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: "landscape", format: "a4" });
             
-            doc.setFontSize(18);
-            doc.text("FINANCIAL RECORDS LEDGER REPORT", 14, 15);
-            doc.setFontSize(10);
-            doc.text(`GENERATED ON: ${new Date().toLocaleDateString('en-GB')}`, 14, 22);
+            doc.setFontSize(16);
+            doc.text("FINANCIAL RECORDS REPORT", 14, 15);
 
-            const tableHeaders = [["S.N.", "DATE", "APPLICANT", "BANK", "LOAN AMT", "TOTAL BASE", "CHALLAN OUT", "CHALLAN FEE", "COMM.", "NET RECV.", "PENDING", "STATUS"]];
-            const tableRows = dataset.map((r, index) => [
-                index + 1,
-                formatDisplayDate(r.date),
-                String(r.name).toUpperCase(),
-                String(r.bank).toUpperCase(),
-                `RS. ${r.loanAmount || 0}`,
-                `RS. ${r.total}`,
-                `RS. ${r.challan}`,
-                `RS. ${r.fee}`,
-                `RS. ${r.commission || 0}`,
-                `RS. ${r.netReceived}`,
-                `RS. ${r.pending}`,
-                String(r.status).toUpperCase()
+            const headers = [["S.N.", "DATE", "APPLICANT", "BANK", "LOAN AMT", "TOTAL BASE", "CHALLAN OUT", "CHALLAN FEE", "COMM.", "NET RECV.", "PENDING", "STATUS"]];
+            const rows = dataset.map((r, index) => [
+                index + 1, formatDisplayDate(r.date), String(r.name).toUpperCase(), String(r.bank).toUpperCase(),
+                `RS. ${r.loanAmount || 0}`, `RS. ${r.total}`, `RS. ${r.challan}`, `RS. ${r.fee}`, `RS. ${r.commission || 0}`,
+                `RS. ${r.netReceived}`, `RS. ${r.pending}`, String(r.status).toUpperCase()
             ]);
 
             doc.autoTable({
-                head: tableHeaders,
-                body: tableRows,
-                startY: 28,
-                theme: 'grid',
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
-                alternateRowStyles: { fillColor: [248, 250, 252] }
+                head: headers, body: rows, startY: 22, theme: 'grid', styles: { fontSize: 8 },
+                headStyles: { fillColor: [30, 41, 59] }
             });
-            doc.save(`FINANCIAL_LEDGER_REPORT_${new Date().toISOString().slice(0,10)}.pdf`);
+            doc.save(`REPORT_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
         filterAndRender();
