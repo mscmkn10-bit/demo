@@ -373,7 +373,7 @@
 
             localStorage.setItem('finDashRecords', JSON.stringify(records));
 
-            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbyIzcAcJHrfqYtVpFs5P6IgH0PeTLnU-xnha8BUtBZV3LVip1lEXJ2Wlykn6PSrwbyA/exec") {
+            if (APPS_SCRIPT_URL !== "" && APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbx3Ep8wLp4Z2G9ugBnVVjRXIf4oraBSLTOsg0SVp9jdITWhCIC_MgCixOPZIRZfldif/exec") {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -529,7 +529,7 @@
         }
 
         function fetchFromCloud() {
-            if (APPS_SCRIPT_URL === "" || APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxyMqVf8lD5922SHkJqX4bXHoXd80MobNItNi0arIgDfvTFhPO1n8Z_HeOHE2lmHayT/exec") {
+            if (APPS_SCRIPT_URL === "" || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
                 alert("Please add your deployed Apps Script Web App URL.");
                 return;
             }
