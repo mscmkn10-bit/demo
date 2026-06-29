@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinDash Terminal - Bidirectional Sync Node</title>
+  <title>FinDash Terminal - Absolute Sync Node</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -23,7 +23,7 @@
       <span class="text-xl font-bold tracking-wider text-white">FinDash</span>
     </div>
     <nav class="flex-1 px-4 py-6 space-y-2">
-      <a href="#" class="flex items-center gap-3 px-4 py-3 text-emerald-400 bg-slate-800 rounded-lg font-medium interaction">
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-emerald-400 bg-slate-800 rounded-lg font-medium">
         <i class="fa-solid fa-table-list"></i> Core Ledger System
       </a>
     </nav>
@@ -38,7 +38,7 @@
   <main class="main-content min-h-screen flex flex-col">
     <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
       <div class="flex items-center gap-4">
-        <h1 class="text-xl font-semibold text-slate-900">GOVIND SINGH CHAUHAN</h1>
+        <h1 class="text-xl font-semibold text-slate-900">Synchronized Ledger Node</h1>
         <div id="syncStatus" class="text-xs font-semibold px-2.5 py-1 rounded bg-amber-100 text-amber-800 flex items-center gap-1">
           <i class="fa-solid fa-triangle-exclamation"></i> Initialization Required
         </div>
@@ -166,16 +166,20 @@
 
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
           <div class="p-6 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-3 flex-wrap">
-              <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-500 uppercase">From:</label>
-                <input type="date" id="filterStart" onchange="applyFiltersAndRender()" class="text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-white">
+            
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-xs mr-2">
+                <button onclick="setStatusFilter('ALL')" id='filterBtnALL' class="px-3 py-1 rounded-md text-xs font-bold transition bg-slate-900 text-white">All</button>
+                <button onclick="setStatusFilter('PENDING')" id='filterBtnPENDING' class="px-3 py-1 rounded-md text-xs font-bold transition text-slate-600 hover:bg-slate-100">Pending</button>
+                <button onclick="setStatusFilter('RECEIVED')" id='filterBtnRECEIVED' class="px-3 py-1 rounded-md text-xs font-bold transition text-slate-600 hover:bg-slate-100">Received</button>
               </div>
-              <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-500 uppercase">To:</label>
-                <input type="date" id="filterEnd" onchange="applyFiltersAndRender()" class="text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-white">
+
+              <div class="flex items-center gap-1">
+                <input type="date" id="filterStart" onchange="applyFiltersAndRender()" class="text-xs border border-slate-300 rounded-md px-2 py-1 bg-white">
+                <span class="text-xs font-bold text-slate-400">to</span>
+                <input type="date" id="filterEnd" onchange="applyFiltersAndRender()" class="text-xs border border-slate-300 rounded-md px-2 py-1 bg-white">
               </div>
-              <button onclick="clearDateFilters()" class="text-xs font-medium text-slate-500 hover:text-slate-800 underline">Clear</button>
+              <button onclick="clearDateFilters()" class="text-xs font-medium text-slate-500 hover:text-slate-800 underline ml-1">Clear Date</button>
             </div>
             
             <div class="flex items-center gap-2">
@@ -215,51 +219,39 @@
   </main>
 
   <script>
-    // CRITICAL API ROUTE ACCESS CHANNEL — MAPPED DIRECTLY TO YOUR DEPLOYMENT LINK
-    const API_URL = "https://script.google.com/macros/s/AKfycbzvtByCzIkt-DG85-pZH-zGqSVInPJAcgizRjp_icL8UZc1dSunPi0UquSMcfl_a976/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbyLo3Ka916vgU8Hw87QgiaTvfkbGccfx-Xisi1wwp_llriK0c4E5bmEVMda06cMuwVE/exec"; 
 
     let globalRecords = [];
+    let activeStatusFilter = "ALL"; // Tracks dynamic status filtering nodes: ALL, PENDING, RECEIVED
 
-    // --- DATE CONVERSION SECURITY INTERPOLATION HELPERS ---
+    // --- ABSOLUTE ISO STRING-ONLY DATE CONVERSION RULES ---
     
     function formatDisplayDate(dateString) {
       if (!dateString) return "";
-      if (dateString.includes('T')) dateString = dateString.split('T')[0];
-      if (dateString.includes('-')) {
-        const parts = dateString.split('-');
+      let cleaned = dateString.trim().split(" ")[0];
+      if (cleaned.includes('-')) {
+        const parts = cleaned.split('-');
         if (parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
-      return dateString;
+      return cleaned;
     }
 
     function formatInputDate(dateStr) {
       if (!dateStr) return "";
-      if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
-      if (dateStr.includes('/')) {
-        const parts = dateStr.split('/');
+      let cleaned = dateStr.trim().split(" ")[0];
+      if (cleaned.includes('/')) {
+        const parts = cleaned.split('/');
         if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
       }
-      return dateStr;
+      return cleaned;
     }
 
-    function parseToJsDate(dateStr) {
-      if (!dateStr) return null;
-      if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
-      let year, month, day;
-      if (dateStr.includes('-')) {
-        const parts = dateStr.split('-');
-        year = parseInt(parts[0], 10);
-        month = parseInt(parts[1], 10) - 1;
-        day = parseInt(parts[2], 10);
-      } else if (dateStr.includes('/')) {
-        const parts = dateStr.split('/');
-        year = parseInt(parts[2], 10);
-        month = parseInt(parts[1], 10) - 1;
-        day = parseInt(parts[0], 10);
-      } else {
-        return null;
-      }
-      return new Date(year, month, day);
+    // Dynamic filtering handles input dates natively as strings to avoid timezone evaluation
+    function checkDateInRange(targetYmd, startYmd, endYmd) {
+      if (!targetYmd) return false;
+      if (startYmd && targetYmd < startYmd) return false;
+      if (endYmd && targetYmd > endYmd) return false;
+      return true;
     }
 
     // --- FINANCIAL METRICS COMPUTATION ENGINE ---
@@ -282,8 +274,21 @@
       }
     }
 
-    // --- SYSTEM SYNCHRONIZATION OVERHEADS ---
+    // --- WORKSPACE LAYOUT ACTIONS & CONTROLS ---
     
+    function setStatusFilter(statusType) {
+      activeStatusFilter = statusType;
+      ['ALL', 'PENDING', 'RECEIVED'].forEach(type => {
+        const btn = document.getElementById(`filterBtn${type}`);
+        if(type === statusType) {
+          btn.className = "px-3 py-1 rounded-md text-xs font-bold transition bg-slate-900 text-white";
+        } else {
+          btn.className = "px-3 py-1 rounded-md text-xs font-bold transition text-slate-600 hover:bg-slate-100";
+        }
+      });
+      applyFiltersAndRender();
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const cached = localStorage.getItem('fin_ledger_data');
       if (cached) {
@@ -307,7 +312,6 @@
 
     function fetchFromCloud() {
       setSyncBadge(false);
-      
       fetch(API_URL)
         .then(res => res.json())
         .then(data => {
@@ -317,7 +321,7 @@
             setSyncBadge(true, "Cloud Database Match Verified");
             applyFiltersAndRender();
           } else {
-            throw new Error(data.error || "Malformed dataset error encountered.");
+            throw new Error(data.error || "Malformed dataset error.");
           }
         })
         .catch(err => {
@@ -329,18 +333,20 @@
     // --- RENDER & DISPLAY COUPLING ENGINE ---
     
     function applyFiltersAndRender() {
-      const startVal = document.getElementById('filterStart').value;
+      const startVal = document.getElementById('filterStart').value; // Matches clean HTML date format YYYY-MM-DD
       const endVal = document.getElementById('filterEnd').value;
-      const startDate = startVal ? parseToJsDate(startVal) : null;
-      const endDate = endVal ? parseToJsDate(endVal) : null;
-      if(endDate) endDate.setHours(23, 59, 59, 999);
 
       let filtered = globalRecords.filter(rec => {
         if (!rec.date) return false;
-        const recDate = parseToJsDate(rec.date);
-        if (!recDate) return false;
-        if (startDate && recDate < startDate) return false;
-        if (endDate && recDate > endDate) return false;
+        
+        // 1. Evaluate Date Ranges via strict literal sorting constraints
+        const currentYmd = formatInputDate(rec.date);
+        if (!checkDateInRange(currentYmd, startVal, endVal)) return false;
+        
+        // 2. Evaluate Core Workflow Status Filters
+        if (activeStatusFilter === "PENDING" && rec.status !== "Pending") return false;
+        if (activeStatusFilter === "RECEIVED" && rec.status !== "Received") return false;
+        
         return true;
       });
 
@@ -418,12 +424,12 @@
       e.preventDefault();
       
       const id = document.getElementById('recordId').value;
-      const rawDate = document.getElementById('date').value;
+      const rawDate = document.getElementById('date').value; // Returns YYYY-MM-DD from user view selector
       const action = id ? "UPDATE" : "INSERT";
       
       const record = {
         id: id || undefined,
-        date: formatInputDate(rawDate),
+        date: rawDate, // Transmit pure string literal without initialization inside JavaScript Date vectors
         name: document.getElementById('name').value,
         bank: document.getElementById('bank').value,
         loanAmount: parseFloat(document.getElementById('loanAmount').value) || 0,
@@ -520,10 +526,10 @@
       document.getElementById('clearEditBtn').classList.add('hidden');
     }
 
-    // --- DATA DOWNSTREAM ENGINE EXPORTS ---
+    // --- DATA DOWNSTREAM EXPORT CONTROLS ---
     
     function exportToExcel() {
-      if(globalRecords.length === 0) return alert("Operation rejected: Local ledger workspace data is currently empty.");
+      if(globalRecords.length === 0) return alert("Operation rejected: Local workspace is empty.");
       const dataRows = globalRecords.map(r => {
         const t = parseFloat(r.total) || 0;
         const ch = parseFloat(r.challan) || 0;
@@ -535,49 +541,72 @@
           "BANK": String(r.bank).toUpperCase(),
           "LOAN AMOUNT (INR)": parseFloat(r.loanAmount) || 0,
           "TOTAL GROSS (INR)": t,
-          "NET CALCULATED (INR)": t - ch - fe - co,
+          "CHALLAN OUTFLOW (INR)": ch,
+          "CHALLAN FEE (INR)": fe,
+          "COMMISSION (INR)": co,
+          "NET RECEIVED (INR)": parseFloat(r.netReceived) || 0,
+          "PENDING POOL (INR)": parseFloat(r.pending) || 0,
           "STATUS": String(r.status).toUpperCase()
         };
       });
       const ws = XLSX.utils.json_to_sheet(dataRows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Ledger Workspace");
-      XLSX.writeFile(wb, `FinDash_MasterExport_${new Date().getTime()}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, "Master Excel Workspace");
+      XLSX.writeFile(wb, `FinDash_MasterExcel_${new Date().getTime()}.xlsx`);
     }
 
     function exportToPDF() {
-      if(globalRecords.length === 0) return alert("Operation rejected: Local ledger workspace data is currently empty.");
+      const startVal = document.getElementById('filterStart').value;
+      const endVal = document.getElementById('filterEnd').value;
+
+      // Filter local array targets to match the UI view constraints
+      let visibleRecords = globalRecords.filter(rec => {
+        if (!rec.date) return false;
+        const currentYmd = formatInputDate(rec.date);
+        if (!checkDateInRange(currentYmd, startVal, endVal)) return false;
+        if (activeStatusFilter === "PENDING" && rec.status !== "Pending") return false;
+        if (activeStatusFilter === "RECEIVED" && rec.status !== "Received") return false;
+        return true;
+      });
+
+      if(visibleRecords.length === 0) return alert("Operation rejected: No matching rows to populate PDF print archive.");
+      
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape' });
       
-      doc.setFontSize(14);
-      doc.text("FINANCIAL MANAGEMENT TERMINAL - MASTER ARCHIVE", 14, 15);
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.text("FINANCIAL MANAGEMENT TERMINAL - ACCOUNT LEDGER REPORT", 14, 15);
       
-      const rows = globalRecords.map(r => {
-        const t = parseFloat(r.total) || 0;
-        const ch = parseFloat(r.challan) || 0;
-        const fe = parseFloat(r.fee) || 0;
-        const co = parseFloat(r.commission) || 0;
+      // Strict 6-Column mapping requirement: date, client name, total gross, challan outflow, challan fee, pending pool
+      const pdfHeaders = [['DATE', 'CLIENT NAME', 'TOTAL GROSS', 'CHALLAN OUTFLOW', 'CHALLAN FEE', 'PENDING POOL']];
+      
+      const pdfRows = visibleRecords.map(r => {
         return [
           formatDisplayDate(r.date),
           String(r.name).toUpperCase(),
-          String(r.bank).toUpperCase(),
-          "Rs. " + (parseFloat(r.loanAmount) || 0).toFixed(2),
-          "Rs. " + t.toFixed(2),
-          "Rs. " + (t - ch - fe - co).toFixed(2),
-          String(r.status).toUpperCase()
+          "Rs. " + (parseFloat(r.total) || 0).toFixed(2),
+          "Rs. " + (parseFloat(r.challan) || 0).toFixed(2),
+          "Rs. " + (parseFloat(r.fee) || 0).toFixed(2),
+          "Rs. " + (parseFloat(r.pending) || 0).toFixed(2)
         ];
       });
 
       doc.autoTable({
-        head: [['DATE', 'CLIENT NAME', 'BANK', 'LOAN AMOUNT', 'TOTAL GROSS', 'NET CALCULATED', 'STATUS']],
-        body: rows,
-        startY: 25,
+        head: pdfHeaders,
+        body: pdfRows,
+        startY: 22,
         theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42] }
+        headStyles: { fillColor: [15, 23, 42], fontStyle: 'bold' },
+        columnStyles: {
+          2: { halign: 'right' },
+          3: { halign: 'right' },
+          4: { halign: 'right' },
+          5: { halign: 'right' }
+        }
       });
 
-      doc.save(`FinDash_PDF_Report_${new Date().getTime()}.pdf`);
+      doc.save(`FinDash_LedgerReport_${new Date().getTime()}.pdf`);
     }
   </script>
 </body>
